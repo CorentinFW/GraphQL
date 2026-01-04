@@ -1,0 +1,82 @@
+# Schéma GraphQL pour le service Agence
+
+type Query {
+    # Ping pour tester la disponibilité
+    ping: PingResponse!
+
+    # Rechercher dans tous les hôtels partenaires
+    rechercherChambres(criteres: RechercheInput!): [Chambre!]!
+
+    # Obtenir les réservations d'un hôtel
+    reservationsHotel(hotelNom: String!): [Reservation!]!
+
+    # Obtenir toutes les réservations
+    toutesReservations: [Reservation!]!
+}
+
+type Mutation {
+    # Effectuer une réservation via l'agence
+    effectuerReservation(reservation: ReservationAgenceInput!): ReservationResponse!
+}
+
+type PingResponse {
+    message: String!
+    status: String!
+    timestamp: String!
+}
+
+type Chambre {
+    id: ID!
+    nom: String!
+    prix: Float!
+    nbrDeLit: Int!
+    nbrEtoile: Int!
+    disponible: Boolean!
+    imageUrl: String
+    hotelNom: String!
+    hotelAdresse: String!
+    prixOriginal: Float
+    coefficient: Float
+}
+
+type Reservation {
+    id: ID!
+    chambreId: ID!
+    hotelNom: String
+    nomClient: String!
+    prenomClient: String!
+    emailClient: String
+    telephoneClient: String
+    dateArrive: String!
+    dateDepart: String!
+    prixTotal: Float
+}
+
+input RechercheInput {
+    adresse: String
+    dateArrive: String!
+    dateDepart: String!
+    prixMin: Float
+    prixMax: Float
+    nbrEtoile: Int
+    nbrLits: Int
+}
+
+input ReservationAgenceInput {
+    chambreId: ID!
+    hotelAdresse: String!
+    nomClient: String!
+    prenomClient: String!
+    emailClient: String!
+    telephoneClient: String
+    dateArrive: String!
+    dateDepart: String!
+}
+
+type ReservationResponse {
+    success: Boolean!
+    message: String!
+    reservationId: ID
+    hotelNom: String
+}
+
