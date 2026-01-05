@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.tp1.hotellerie.dto.ChambreDTO;
 import org.tp1.hotellerie.dto.HotelInfoDTO;
 import org.tp1.hotellerie.dto.RechercheRequest;
+import org.tp1.hotellerie.dto.ReservationDTO;
 import org.tp1.hotellerie.model.Chambre;
 import org.tp1.hotellerie.model.Hotel;
 import org.tp1.hotellerie.model.Reservation;
@@ -80,6 +81,17 @@ public class HotelQueryResolver {
             .collect(Collectors.toList());
     }
 
+
+    /**
+     * ÉTAPE 2: Query reservations (avec DTO)
+     * Retourne toutes les réservations de l'hôtel avec tous les champs mappés
+     */
+    @QueryMapping
+    public List<ReservationDTO> reservations() {
+        System.out.println("📋 ÉTAPE 2: GraphQL Query reservations (DTO) appelée");
+        return hotelService.getToutesReservationsDTO();
+    }
+
     /**
      * Query: chambre
      * Obtenir une chambre par son ID
@@ -112,16 +124,6 @@ public class HotelQueryResolver {
         } catch (NumberFormatException e) {
             return null;
         }
-    }
-
-    /**
-     * Query: reservations
-     * Lister toutes les réservations de l'hôtel
-     * Remplace: GET /api/hotel/reservations
-     */
-    @QueryMapping
-    public List<Reservation> reservations() {
-        return hotelService.getReservations();
     }
 }
 

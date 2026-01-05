@@ -206,6 +206,40 @@ public class MultiHotelGraphQLClient {
     }
 
     /**
+     * Obtenir toutes les réservations de tous les hôtels partenaires
+     */
+    public List<Map<String, Object>> getAllReservations() {
+        System.out.println("📋 Récupération des réservations de " + hotelGraphQLUrls.size() + " hôtels...");
+
+        List<Map<String, Object>> allReservations = new ArrayList<>();
+
+        // Interroger chaque hôtel séquentiellement
+        for (String hotelGraphQLUrl : hotelGraphQLUrls) {
+            try {
+                // Récupérer les infos de l'hôtel
+                Map<String, Object> hotelInfo = hotelGraphQLClient.getHotelInfo(hotelGraphQLUrl);
+                String hotelNom = (String) hotelInfo.get("nom");
+
+                // Récupérer les réservations de cet hôtel
+                List<Map<String, Object>> reservations = hotelGraphQLClient.getReservations(hotelGraphQLUrl);
+
+                // Enrichir chaque réservation avec le nom de l'hôtel
+                for (Map<String, Object> reservation : reservations) {
+                    reservation.put("hotelNom", hotelNom);
+                    allReservations.add(reservation);
+                }
+
+                System.out.println("  ✅ " + hotelNom + ": " + reservations.size() + " réservation(s)");
+            } catch (Exception e) {
+                System.err.println("  ❌ Erreur avec " + hotelGraphQLUrl + ": " + e.getMessage());
+            }
+        }
+
+        System.out.println("📊 Total: " + allReservations.size() + " réservation(s)");
+        return allReservations;
+    }
+
+    /**
      * Obtenir les informations de tous les hôtels
      */
     public List<Map<String, Object>> getAllHotelsInfo() {

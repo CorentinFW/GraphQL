@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.tp1.hotellerie.dto.ReservationDTO;
 import org.tp1.hotellerie.model.*;
 import org.tp1.hotellerie.repository.*;
 
@@ -369,5 +370,58 @@ public class HotelService {
         public String getMessage() {
             return message;
         }
+    }
+
+    /**
+     * ÉTAPE 1: Récupérer toutes les réservations de l'hôtel
+     */
+    public List<Reservation> getToutesReservations() {
+        return reservationRepository.findAll();
+    }
+
+    /**
+     * ÉTAPE 2: Récupérer toutes les réservations sous forme de DTO
+     * Mappe Reservation JPA -> ReservationDTO pour GraphQL
+     */
+    public List<ReservationDTO> getToutesReservationsDTO() {
+        List<Reservation> reservations = reservationRepository.findAll();
+        List<ReservationDTO> dtos = new ArrayList<>();
+
+        for (Reservation reservation : reservations) {
+            ReservationDTO dto = new ReservationDTO();
+            dto.setId(reservation.getId());
+
+            // Mapper chambre
+            if (reservation.getChambre() != null) {
+                dto.setChambreId(reservation.getChambre().getId());
+            }
+
+            // Mapper client
+            if (reservation.getClient() != null) {
+                dto.setNomClient(reservation.getClient().getNom());
+                dto.setPrenomClient(reservation.getClient().getPrenom());
+                dto.setEmailClient(reservation.getClient().getNom() + "@example.com"); // Généré
+                dto.setTelephoneClient(null); // Pas de téléphone dans le modèle
+            }
+
+            // Mapper dates (Date -> String)
+            if (reservation.getDateArrive() != null) {
+                dto.setDateArrive(new java.text.SimpleDateFormat("yyyy-MM-dd").format(reservation.getDateArrive()));
+            }
+            if (reservation.getDateDepart() != null) {
+                dto.setDateDepart(new java.text.SimpleDateFormat("yyyy-MM-dd").format(reservation.getDateDepart()));
+            }
+
+            // Calculer prix total (prix chambre * nombre de jours)
+            if (reservation.getChambre() != null && reservation.getDateArrive() != null && reservation.getDateDepart() != null) {
+                long diffInMillies = Math.abs(reservation.getDateDepart().getTime() - reservation.getDateArrive().getTime());
+                long diffInDays = diffInMillies / (1000 * 60 * 60 * 24);
+                dto.setPrixTotal(reservation.getChambre().getPrix() * diffInDays);
+            }
+
+            dtos.add(dto);
+        }
+
+        return dtos;
     }
 }

@@ -179,31 +179,6 @@ public class MultiAgenceGraphQLClient {
     }
 
     /**
-     * Obtenir toutes les réservations de toutes les agences
-     */
-    public Map<String, List<Map<String, Object>>> getAllReservations() {
-        System.out.println("📋 Récupération de toutes les réservations...");
-
-        Map<String, List<Map<String, Object>>> allReservations = new LinkedHashMap<>();
-
-        // Pour chaque agence
-        for (String agenceGraphQLUrl : agenceGraphQLUrls) {
-            try {
-                List<Map<String, Object>> reservations = agenceGraphQLClient.getToutesReservations(agenceGraphQLUrl);
-
-                String agenceName = agenceGraphQLUrl.contains("8081") ? agence1Name : agence2Name;
-                allReservations.put(agenceName, reservations);
-
-                System.out.println("✓ [" + agenceName + "] " + reservations.size() + " réservation(s)");
-            } catch (Exception e) {
-                System.err.println("✗ [" + agenceGraphQLUrl + "] Erreur: " + e.getMessage());
-            }
-        }
-
-        return allReservations;
-    }
-
-    /**
      * Obtenir la liste des hôtels disponibles
      */
     public List<Map<String, Object>> getAllHotels() {
@@ -235,6 +210,44 @@ public class MultiAgenceGraphQLClient {
         System.out.println("✅ Total: " + allHotels.size() + " hôtel(s) unique(s)");
 
         return allHotels;
+    }
+
+    /**
+     * Obtenir toutes les réservations de toutes les agences
+     */
+    public Map<String, List<Map<String, Object>>> getAllReservations() {
+        System.out.println("📋 Récupération des réservations de toutes les agences...");
+
+        Map<String, List<Map<String, Object>>> reservationsByAgence = new LinkedHashMap<>();
+
+        // Interroger l'agence 1
+        if (agence1GraphQLUrl != null) {
+            try {
+                List<Map<String, Object>> reservations = agenceGraphQLClient.getReservations(agence1GraphQLUrl);
+                reservationsByAgence.put(agence1Name, reservations);
+                System.out.println("  ✅ " + agence1Name + ": " + reservations.size() + " réservation(s)");
+            } catch (Exception e) {
+                System.err.println("  ❌ Erreur " + agence1Name + ": " + e.getMessage());
+                reservationsByAgence.put(agence1Name, List.of());
+            }
+        }
+
+        // Interroger l'agence 2
+        if (agence2GraphQLUrl != null) {
+            try {
+                List<Map<String, Object>> reservations = agenceGraphQLClient.getReservations(agence2GraphQLUrl);
+                reservationsByAgence.put(agence2Name, reservations);
+                System.out.println("  ✅ " + agence2Name + ": " + reservations.size() + " réservation(s)");
+            } catch (Exception e) {
+                System.err.println("  ❌ Erreur " + agence2Name + ": " + e.getMessage());
+                reservationsByAgence.put(agence2Name, List.of());
+            }
+        }
+
+        int total = reservationsByAgence.values().stream().mapToInt(List::size).sum();
+        System.out.println("📊 Total: " + total + " réservation(s)");
+
+        return reservationsByAgence;
     }
 }
 

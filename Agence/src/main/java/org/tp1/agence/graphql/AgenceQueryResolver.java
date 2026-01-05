@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.tp1.agence.dto.ChambreDTO;
 import org.tp1.agence.dto.RechercheRequest;
 import org.tp1.agence.service.AgenceService;
+import org.tp1.agence.client.MultiHotelGraphQLClient;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +22,9 @@ public class AgenceQueryResolver {
 
     @Autowired
     private AgenceService agenceService;
+
+    @Autowired
+    private MultiHotelGraphQLClient multiHotelGraphQLClient;
 
     /**
      * Query: ping
@@ -64,16 +68,13 @@ public class AgenceQueryResolver {
     }
 
     /**
-     * Query: toutesReservations
-     * Obtenir toutes les réservations de tous les hôtels
+     * ÉTAPE 3: Query toutesReservations
+     * Obtenir toutes les réservations de tous les hôtels partenaires
      */
     @QueryMapping
     public List<Map<String, Object>> toutesReservations() {
-        System.out.println("📋 GraphQL Query: Toutes les réservations");
-
-        // TODO: Implémenter l'interrogation de tous les hôtels pour leurs réservations
-        // Pour l'instant, retourner une liste vide
-        return List.of();
+        System.out.println("📋 ÉTAPE 3: GraphQL Query toutesReservations appelée");
+        return multiHotelGraphQLClient.getAllReservations();
     }
 
     /**

@@ -261,5 +261,56 @@ public class HotelGraphQLClient {
 
         return dto;
     }
+
+    /**
+     * Récupérer toutes les réservations d'un hôtel via GraphQL
+     */
+    public List<Map<String, Object>> getReservations(String hotelGraphQLUrl) {
+        try {
+            String query = """
+                query {
+                  reservations {
+                    id
+                    chambreId
+                    nomClient
+                    prenomClient
+                    emailClient
+                    telephoneClient
+                    dateArrive
+                    dateDepart
+                    prixTotal
+                  }
+                }
+                """;
+
+            Map<String, Object> requestBody = Map.of("query", query);
+
+            WebClient webClient = webClientBuilder.baseUrl(hotelGraphQLUrl).build();
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> response = webClient.post()
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
+
+            if (response != null && response.containsKey("data")) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> data = (Map<String, Object>) response.get("data");
+
+                if (data != null && data.containsKey("reservations")) {
+                    @SuppressWarnings("unchecked")
+                    List<Map<String, Object>> reservations = (List<Map<String, Object>>) data.get("reservations");
+                    return reservations;
+                }
+            }
+
+            return Collections.emptyList();
+
+        } catch (Exception e) {
+            System.err.println("❌ Erreur lors de la récupération des réservations de " + hotelGraphQLUrl + ": " + e.getMessage());
+            return Collections.emptyList();
+        }
+    }
 }
 
