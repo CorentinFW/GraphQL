@@ -95,6 +95,11 @@ public class ReservationRequest {
         this.clientNumeroCarteBleue = clientNumeroCarteBleue;
     }
 
+    // Setter pour GraphQL (numeroCarteBancaire -> clientNumeroCarteBleue)
+    public void setNumeroCarteBancaire(String numeroCarteBancaire) {
+        this.clientNumeroCarteBleue = numeroCarteBancaire;
+    }
+
     public Long getChambreId() {
         return chambreId;
     }

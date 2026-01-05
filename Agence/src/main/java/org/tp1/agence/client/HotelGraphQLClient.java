@@ -8,6 +8,7 @@ import org.tp1.agence.dto.ReservationRequest;
 import org.tp1.agence.dto.ReservationResponse;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Client GraphQL pour communiquer avec un hôtel via GraphQL
@@ -90,15 +91,26 @@ public class HotelGraphQLClient {
     public ReservationResponse effectuerReservation(String hotelGraphQLUrl, ReservationRequest request) {
         try {
             // Construction de la mutation GraphQL
-            String mutation = """
+            // Ne pas inclure telephoneClient s'il est vide (GraphQL n'accepte pas "" pour un champ optionnel)
+            String telephoneClientField = "";
+            if (request.getTelephoneClient() != null && !request.getTelephoneClient().trim().isEmpty()) {
+                telephoneClientField = "    telephoneClient: \"" + request.getTelephoneClient() + "\"\n";
+            }
+
+            // Ne pas inclure numeroCarteBancaire s'il est vide
+            String numeroCarteBancaireField = "";
+            if (request.getClientNumeroCarteBleue() != null && !request.getClientNumeroCarteBleue().trim().isEmpty()) {
+                numeroCarteBancaireField = "    numeroCarteBancaire: \"" + request.getClientNumeroCarteBleue() + "\"\n";
+            }
+
+            String mutation = String.format("""
                 mutation {
                   creerReservation(reservation: {
                     chambreId: "%s"
                     nomClient: "%s"
                     prenomClient: "%s"
                     emailClient: "%s"
-                    telephoneClient: "%s"
-                    dateArrive: "%s"
+                %s%s    dateArrive: "%s"
                     dateDepart: "%s"
                   }) {
                     success
@@ -106,15 +118,19 @@ public class HotelGraphQLClient {
                     reservationId
                   }
                 }
-                """.formatted(
+                """,
                 request.getChambreId(),
                 request.getNomClient(),
                 request.getPrenomClient(),
                 request.getEmailClient() != null ? request.getEmailClient() : "",
-                request.getTelephoneClient() != null ? request.getTelephoneClient() : "",
+                telephoneClientField,  // Sera soit "    telephoneClient: "..."\n" soit ""
+                numeroCarteBancaireField,  // Sera soit "    numeroCarteBancaire: "..."\n" soit ""
                 request.getDateArrive(),
                 request.getDateDepart()
             );
+
+            System.out.println("🔍 MUTATION ENVOYÉE À L'HÔTEL:");
+            System.out.println(mutation);
 
             Map<String, Object> requestBody = Map.of("query", mutation);
 
@@ -127,11 +143,23 @@ public class HotelGraphQLClient {
                 .bodyToMono(Map.class)
                 .block();
 
+            // Vérifier d'abord s'il y a des erreurs GraphQL
+            if (response != null && response.containsKey("errors")) {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> errors = (List<Map<String, Object>>) response.get("errors");
+                String errorMessage = errors.stream()
+                    .map(err -> (String) err.get("message"))
+                    .collect(Collectors.joining(", "));
+
+                System.err.println("❌ Erreur GraphQL de l'hôtel: " + errorMessage);
+                return ReservationResponse.error("Erreur GraphQL: " + errorMessage);
+            }
+
             if (response != null && response.containsKey("data")) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> data = (Map<String, Object>) response.get("data");
 
-                if (data.containsKey("creerReservation")) {
+                if (data != null && data.containsKey("creerReservation")) {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> result = (Map<String, Object>) data.get("creerReservation");
 

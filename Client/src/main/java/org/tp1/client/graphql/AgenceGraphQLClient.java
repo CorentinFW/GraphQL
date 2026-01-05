@@ -6,6 +6,7 @@ import org.tp1.client.dto.ChambreDTO;
 import org.tp1.client.dto.ReservationResponse;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Client GraphQL pour communiquer avec une Agence via GraphQL
@@ -150,6 +151,10 @@ public class AgenceGraphQLClient {
                                                     String clientTelephone, String numeroCarteBancaire,
                                                     Long chambreId, String hotelAdresse,
                                                     String dateArrive, String dateDepart) {
+        System.out.println("╔══════════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║ 🔥🔥🔥 NOUVEAU CODE CHARGÉ - VERSION AVEC GESTION D'ERREURS 🔥🔥🔥              ║");
+        System.out.println("╚══════════════════════════════════════════════════════════════════════════════════╝");
+
         try {
             // Construction de la mutation GraphQL
             String mutation = """
@@ -161,6 +166,7 @@ public class AgenceGraphQLClient {
                     prenomClient: "%s"
                     emailClient: "%s"
                     telephoneClient: "%s"
+                    numeroCarteBancaire: "%s"
                     dateArrive: "%s"
                     dateDepart: "%s"
                   }) {
@@ -177,6 +183,7 @@ public class AgenceGraphQLClient {
                 clientPrenom,
                 clientEmail != null ? clientEmail : "",
                 clientTelephone != null ? clientTelephone : "",
+                numeroCarteBancaire != null ? numeroCarteBancaire : "",
                 dateArrive,
                 dateDepart
             );
@@ -192,11 +199,31 @@ public class AgenceGraphQLClient {
                 .bodyToMono(Map.class)
                 .block();
 
+            System.out.println("🔍 RÉPONSE BRUTE GraphQL: " + response);
+
+            // Vérifier d'abord s'il y a des erreurs GraphQL
+            if (response != null && response.containsKey("errors")) {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> errors = (List<Map<String, Object>>) response.get("errors");
+                String errorMessage = errors.stream()
+                    .map(err -> (String) err.get("message"))
+                    .collect(Collectors.joining(", "));
+
+                System.err.println("❌ Erreur GraphQL: " + errorMessage);
+
+                ReservationResponse errorResponse = new ReservationResponse();
+                errorResponse.setSuccess(false);
+                errorResponse.setMessage("Erreur GraphQL: " + errorMessage);
+                return errorResponse;
+            }
+
             if (response != null && response.containsKey("data")) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> data = (Map<String, Object>) response.get("data");
 
-                if (data.containsKey("effectuerReservation")) {
+                System.out.println("🔍 DATA: " + data);
+
+                if (data != null && data.containsKey("effectuerReservation")) {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> result = (Map<String, Object>) data.get("effectuerReservation");
 
@@ -215,7 +242,7 @@ public class AgenceGraphQLClient {
 
             ReservationResponse errorResponse = new ReservationResponse();
             errorResponse.setSuccess(false);
-            errorResponse.setMessage("Erreur lors de la réservation");
+            errorResponse.setMessage("Erreur lors de la réservation - Réponse invalide");
             return errorResponse;
 
         } catch (Exception e) {

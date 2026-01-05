@@ -182,6 +182,17 @@ public class MultiHotelGraphQLClient {
 
         System.out.println("📡 Envoi de la réservation GraphQL à: " + targetHotelGraphQLUrl);
 
+        // Afficher le contenu de la requête
+        System.out.println("📋 ReservationRequest détails:");
+        System.out.println("   - chambreId: " + request.getChambreId());
+        System.out.println("   - nomClient: " + request.getNomClient());
+        System.out.println("   - prenomClient: " + request.getPrenomClient());
+        System.out.println("   - emailClient: " + request.getEmailClient());
+        System.out.println("   - telephoneClient: " + request.getTelephoneClient());
+        System.out.println("   - dateArrive: " + request.getDateArrive());
+        System.out.println("   - dateDepart: " + request.getDateDepart());
+        System.out.println("   - hotelAdresse: " + request.getHotelAdresse());
+
         // Effectuer la réservation via GraphQL
         ReservationResponse response = hotelGraphQLClient.effectuerReservation(targetHotelGraphQLUrl, request);
 

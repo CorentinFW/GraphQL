@@ -68,6 +68,7 @@ input ReservationInput {
     prenomClient: String!
     emailClient: String!
     telephoneClient: String
+    numeroCarteBancaire: String
     dateArrive: String!
     dateDepart: String!
 }
