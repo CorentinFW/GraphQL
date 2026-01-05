@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Arrêt de tous les services REST (Agences, Hôtels, Client, BDD H2)
+# Arrêt de tous les services GraphQL (Agences, Hôtels, Client, BDD H2)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOGS_DIR="$SCRIPT_DIR/logs"
 
 echo "═══════════════════════════════════════════════════════════════"
-echo "   Arrêt de tous les services REST"
+echo "   Arrêt de tous les services GraphQL"
 echo "═══════════════════════════════════════════════════════════════"
 echo ""
 

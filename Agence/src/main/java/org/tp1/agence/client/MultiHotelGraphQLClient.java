@@ -66,58 +66,84 @@ public class MultiHotelGraphQLClient {
     }
 
     /**
-     * Recherche des chambres dans tous les hôtels en parallèle via GraphQL
+     * Recherche des chambres dans tous les hôtels via GraphQL
+     * VERSION SÉQUENTIELLE (pas de parallélisme) pour debugging
      */
     public List<ChambreDTO> rechercherChambres(RechercheRequest request) {
-        System.out.println("🔍 Recherche GraphQL dans " + hotelGraphQLUrls.size() + " hôtels...");
+        System.out.println("🔍 Recherche GraphQL SÉQUENTIELLE dans " + hotelGraphQLUrls.size() + " hôtels...");
 
-        // Créer des tâches asynchrones pour chaque hôtel
-        List<CompletableFuture<List<ChambreDTO>>> futures = hotelGraphQLUrls.stream()
-            .map(hotelGraphQLUrl -> CompletableFuture.supplyAsync(() -> {
-                try {
-                    List<ChambreDTO> chambres = hotelGraphQLClient.rechercherChambres(hotelGraphQLUrl, request);
+        List<ChambreDTO> toutesLesChambres = new ArrayList<>();
 
-                    if (!chambres.isEmpty()) {
-                        // Récupérer les infos de l'hôtel pour enrichir les chambres
-                        Map<String, Object> hotelInfo = hotelGraphQLClient.getHotelInfo(hotelGraphQLUrl);
-                        String hotelNom = (String) hotelInfo.get("nom");
-                        String hotelAdresse = (String) hotelInfo.get("adresse");
+        // Traiter chaque hôtel UN PAR UN (séquentiellement)
+        for (String hotelGraphQLUrl : hotelGraphQLUrls) {
+            try {
+                System.out.println("  → Interrogation de " + hotelGraphQLUrl);
 
-                        // Enrichir chaque chambre avec les infos de l'hôtel
-                        for (ChambreDTO chambre : chambres) {
-                            if (hotelNom != null) chambre.setHotelNom(hotelNom);
-                            if (hotelAdresse != null) chambre.setHotelAdresse(hotelAdresse);
+                // Récupérer les infos de l'hôtel EN PREMIER
+                Map<String, Object> hotelInfo = hotelGraphQLClient.getHotelInfo(hotelGraphQLUrl);
+                String hotelAdresse = (String) hotelInfo.get("adresse");
+                String hotelNomFromInfo = (String) hotelInfo.get("nom");
 
-                            // Conserver le prix original
-                            chambre.setPrixOriginal(chambre.getPrix());
+                System.out.println("    Info récupérée: " + hotelNomFromInfo + " - " + hotelAdresse);
 
-                            // Appliquer le coefficient de prix de l'agence
-                            chambre.setPrix(chambre.getPrix() * agenceCoefficient);
-                            chambre.setCoefficient(agenceCoefficient);
+                // Récupérer les chambres de cet hôtel
+                List<ChambreDTO> chambres = hotelGraphQLClient.rechercherChambres(hotelGraphQLUrl, request);
 
-                            // Ajouter le nom de l'agence
-                            chambre.setAgenceNom(agenceNom);
-                        }
+                if (!chambres.isEmpty()) {
+                    System.out.println("    " + chambres.size() + " chambre(s) reçue(s)");
 
-                        System.out.println("✓ [" + hotelGraphQLUrl + "] Trouvé " + chambres.size() + " chambre(s)");
-                    } else {
-                        System.out.println("○ [" + hotelGraphQLUrl + "] Aucune chambre disponible");
+                    // Enrichir chaque chambre
+                    for (ChambreDTO chambre : chambres) {
+                        System.out.println("      Avant: " + chambre.getNom() + " | hotelNom=" + chambre.getHotelNom() + " | hotelAdresse=" + chambre.getHotelAdresse());
+
+                        // Définir hotelAdresse (pas dans le schema GraphQL de l'hôtel)
+                        chambre.setHotelAdresse(hotelAdresse);
+
+                        // Conserver le prix original
+                        chambre.setPrixOriginal(chambre.getPrix());
+
+                        // Appliquer le coefficient de prix de l'agence
+                        chambre.setPrix(chambre.getPrix() * agenceCoefficient);
+                        chambre.setCoefficient(agenceCoefficient);
+
+                        // Ajouter le nom de l'agence
+                        chambre.setAgenceNom(agenceNom);
+
+                        System.out.println("      Après: " + chambre.getNom() + " | hotelNom=" + chambre.getHotelNom() + " | hotelAdresse=" + chambre.getHotelAdresse() + " | agence=" + chambre.getAgenceNom());
                     }
 
-                    return chambres;
-                } catch (Exception e) {
-                    System.err.println("✗ [" + hotelGraphQLUrl + "] Erreur: " + e.getMessage());
-                    e.printStackTrace();
-                    return new ArrayList<ChambreDTO>();
+                    // Ajouter à la liste totale
+                    toutesLesChambres.addAll(chambres);
+                    System.out.println("    ✓ [" + hotelGraphQLUrl + "] " + chambres.size() + " chambre(s) ajoutée(s)");
+                } else {
+                    System.out.println("    ○ [" + hotelGraphQLUrl + "] Aucune chambre disponible");
                 }
-            }))
-            .collect(Collectors.toList());
 
-        // Attendre que toutes les tâches se terminent et agréger les résultats
-        List<ChambreDTO> toutesLesChambres = futures.stream()
-            .map(CompletableFuture::join)
-            .flatMap(List::stream)
-            .collect(Collectors.toList());
+            } catch (Exception e) {
+                System.err.println("    ✗ [" + hotelGraphQLUrl + "] Erreur: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+        // Filtrer par adresse si spécifiée (côté agence)
+        if (request.getAdresse() != null && !request.getAdresse().trim().isEmpty()) {
+            String adresseRecherchee = request.getAdresse().trim().toLowerCase();
+            System.out.println("  Filtrage par adresse: \"" + adresseRecherchee + "\"");
+
+            toutesLesChambres = toutesLesChambres.stream()
+                .filter(chambre -> {
+                    String hotelAdresse = chambre.getHotelAdresse();
+                    String hotelNom = chambre.getHotelNom();
+
+                    boolean matchAdresse = hotelAdresse != null && hotelAdresse.toLowerCase().contains(adresseRecherchee);
+                    boolean matchNom = hotelNom != null && hotelNom.toLowerCase().contains(adresseRecherchee);
+
+                    return matchAdresse || matchNom;
+                })
+                .collect(Collectors.toList());
+
+            System.out.println("  Après filtrage: " + toutesLesChambres.size() + " chambre(s)");
+        }
 
         System.out.println("✅ Total: " + toutesLesChambres.size() + " chambre(s) disponible(s) via GraphQL");
 

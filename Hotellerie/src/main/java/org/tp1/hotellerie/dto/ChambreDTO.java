@@ -14,6 +14,7 @@ public class ChambreDTO {
     private Integer nbrEtoiles;
     private Boolean disponible;
     private String image;
+    private String hotelNom;
 
     // Constructeurs
     public ChambreDTO() {
@@ -84,6 +85,23 @@ public class ChambreDTO {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public String getHotelNom() {
+        return hotelNom;
+    }
+
+    public void setHotelNom(String hotelNom) {
+        this.hotelNom = hotelNom;
+    }
+
+    // Alias pour GraphQL
+    public Integer getNbrDeLit() {
+        return nbrLits;
+    }
+
+    public String getImageUrl() {
+        return image;
     }
 
     @Override

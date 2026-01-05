@@ -149,5 +149,10 @@ public class ChambreDTO {
     public void setCoefficient(float coefficient) {
         this.coefficient = coefficient;
     }
+
+    // Alias pour GraphQL
+    public int getNbrDeLit() {
+        return nbrLits;
+    }
 }
 

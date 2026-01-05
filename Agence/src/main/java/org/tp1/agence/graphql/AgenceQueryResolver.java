@@ -58,7 +58,7 @@ public class AgenceQueryResolver {
     public List<Map<String, Object>> reservationsHotel(@Argument String hotelNom) {
         System.out.println("📋 GraphQL Query: Réservations pour l'hôtel: " + hotelNom);
 
-        // Cette fonctionnalité nécessiterait d'interroger l'hôtel
+        // TODO: Implémenter l'interrogation de l'hôtel pour ses réservations
         // Pour l'instant, retourner une liste vide
         return List.of();
     }
@@ -71,9 +71,24 @@ public class AgenceQueryResolver {
     public List<Map<String, Object>> toutesReservations() {
         System.out.println("📋 GraphQL Query: Toutes les réservations");
 
-        // Cette fonctionnalité nécessiterait d'interroger tous les hôtels
+        // TODO: Implémenter l'interrogation de tous les hôtels pour leurs réservations
         // Pour l'instant, retourner une liste vide
         return List.of();
+    }
+
+    /**
+     * Query: hotelsPartenaires
+     * Obtenir la liste des hôtels partenaires de l'agence
+     */
+    @QueryMapping
+    public List<Map<String, Object>> hotelsPartenaires() {
+        System.out.println("🏨 GraphQL Query: Liste des hôtels partenaires");
+
+        List<Map<String, Object>> hotels = agenceService.getHotelsPartenaires();
+
+        System.out.println("✅ " + hotels.size() + " hôtel(s) partenaire(s)");
+
+        return hotels;
     }
 }
 

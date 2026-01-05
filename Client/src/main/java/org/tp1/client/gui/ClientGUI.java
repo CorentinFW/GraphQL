@@ -652,12 +652,78 @@ public class ClientGUI {
     }
 
     private void afficherReservations() {
-        log("📊 Fonctionnalité temporairement non disponible avec GraphQL");
-        JOptionPane.showMessageDialog(frame,
-            "Cette fonctionnalité n'est pas encore implémentée avec GraphQL.\n\n" +
-            "À venir dans une prochaine version.",
-            "Non disponible",
-            JOptionPane.INFORMATION_MESSAGE);
+        log("📊 Chargement des réservations...");
+        setStatus("Chargement des réservations...");
+
+        new SwingWorker<Map<String, List<Map<String, Object>>>, Void>() {
+            @Override
+            protected Map<String, List<Map<String, Object>>> doInBackground() throws Exception {
+                return agenceGraphQLClient.getAllReservations();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    Map<String, List<Map<String, Object>>> reservations = get();
+
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("═══ RÉSERVATIONS PAR AGENCE ═══\n\n");
+
+                    int total = 0;
+                    for (Map.Entry<String, List<Map<String, Object>>> entry : reservations.entrySet()) {
+                        sb.append("🏢 ").append(entry.getKey()).append("\n");
+                        for (int i = 0; i < 60; i++) sb.append("─");
+                        sb.append("\n");
+
+                        if (entry.getValue().isEmpty()) {
+                            sb.append("  Aucune réservation\n");
+                        } else {
+                            for (Map<String, Object> reservation : entry.getValue()) {
+                                sb.append(String.format("  📋 Réservation #%s\n", reservation.get("id")));
+                                sb.append(String.format("     Client: %s %s\n",
+                                    reservation.get("prenomClient"), reservation.get("nomClient")));
+                                if (reservation.get("hotelNom") != null) {
+                                    sb.append(String.format("     Hôtel: %s\n", reservation.get("hotelNom")));
+                                }
+                                sb.append(String.format("     Dates: %s → %s\n",
+                                    reservation.get("dateArrive"), reservation.get("dateDepart")));
+                                if (reservation.get("prixTotal") != null) {
+                                    sb.append(String.format("     Prix: %.2f €\n",
+                                        ((Number) reservation.get("prixTotal")).floatValue()));
+                                }
+                                sb.append("\n");
+                                total++;
+                            }
+                        }
+                        sb.append("\n");
+                    }
+
+                    sb.append("✓ Total: ").append(total).append(" réservation(s)");
+
+                    JTextArea textArea = new JTextArea(sb.toString());
+                    textArea.setEditable(false);
+                    textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+                    JScrollPane scrollPane = new JScrollPane(textArea);
+                    scrollPane.setPreferredSize(new Dimension(700, 500));
+
+                    JOptionPane.showMessageDialog(frame,
+                        scrollPane,
+                        "Réservations",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+                    log("✓ " + total + " réservation(s) affichée(s)");
+                    setStatus("Prêt");
+                } catch (Exception e) {
+                    log("✗ Erreur lors du chargement des réservations: " + e.getMessage());
+                    e.printStackTrace();
+                    setStatus("Erreur");
+                    JOptionPane.showMessageDialog(frame,
+                        "Erreur lors de la récupération des réservations:\n" + e.getMessage(),
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }.execute();
     }
 
     /* TODO: Implémenter la récupération des réservations via GraphQL
@@ -727,12 +793,60 @@ public class ClientGUI {
     */
 
     private void afficherHotels() {
-        log("🏨 Fonctionnalité temporairement non disponible avec GraphQL");
-        JOptionPane.showMessageDialog(frame,
-            "Cette fonctionnalité n'est pas encore implémentée avec GraphQL.\n\n" +
-            "À venir dans une prochaine version.",
-            "Non disponible",
-            JOptionPane.INFORMATION_MESSAGE);
+        log("🏨 Chargement de la liste des hôtels...");
+        setStatus("Chargement des hôtels...");
+
+        new SwingWorker<List<Map<String, Object>>, Void>() {
+            @Override
+            protected List<Map<String, Object>> doInBackground() throws Exception {
+                return agenceGraphQLClient.getAllHotels();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    List<Map<String, Object>> hotels = get();
+
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("═══ HÔTELS DISPONIBLES ═══\n\n");
+
+                    for (Map<String, Object> hotel : hotels) {
+                        sb.append("🏨 ").append(hotel.get("nom")).append("\n");
+                        for (int i = 0; i < 60; i++) sb.append("─");
+                        sb.append("\n");
+                        sb.append("  📍 Adresse: ").append(hotel.get("adresse")).append("\n");
+                        if (hotel.get("ville") != null) {
+                            sb.append("  🏙️  Ville: ").append(hotel.get("ville")).append("\n");
+                        }
+                        sb.append("\n");
+                    }
+
+                    sb.append("✓ Total: ").append(hotels.size()).append(" hôtel(s)");
+
+                    JTextArea textArea = new JTextArea(sb.toString());
+                    textArea.setEditable(false);
+                    textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+                    JScrollPane scrollPane = new JScrollPane(textArea);
+                    scrollPane.setPreferredSize(new Dimension(700, 400));
+
+                    JOptionPane.showMessageDialog(frame,
+                        scrollPane,
+                        "Hôtels Disponibles",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+                    log("✓ " + hotels.size() + " hôtel(s) affichée(s)");
+                    setStatus("Prêt");
+                } catch (Exception e) {
+                    log("✗ Erreur lors du chargement des hôtels: " + e.getMessage());
+                    e.printStackTrace();
+                    setStatus("Erreur");
+                    JOptionPane.showMessageDialog(frame,
+                        "Erreur lors de la récupération des hôtels:\n" + e.getMessage(),
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }.execute();
     }
 
     /* TODO: Implémenter la récupération des hôtels via GraphQL

@@ -12,6 +12,9 @@ type Query {
 
     # Obtenir toutes les réservations
     toutesReservations: [Reservation!]!
+
+    # Obtenir la liste des hôtels partenaires
+    hotelsPartenaires: [HotelInfo!]!
 }
 
 type Mutation {
@@ -30,13 +33,14 @@ type Chambre {
     nom: String!
     prix: Float!
     nbrDeLit: Int!
-    nbrEtoile: Int!
+    nbrEtoiles: Int!
     disponible: Boolean!
     imageUrl: String
     hotelNom: String!
     hotelAdresse: String!
     prixOriginal: Float
     coefficient: Float
+    agenceNom: String
 }
 
 type Reservation {
@@ -50,6 +54,12 @@ type Reservation {
     dateArrive: String!
     dateDepart: String!
     prixTotal: Float
+}
+
+type HotelInfo {
+    nom: String!
+    adresse: String!
+    ville: String
 }
 
 input RechercheInput {

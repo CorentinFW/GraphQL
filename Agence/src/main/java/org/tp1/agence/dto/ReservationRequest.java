@@ -28,6 +28,11 @@ public class ReservationRequest {
         this.clientNom = clientNom;
     }
 
+    // Setter pour GraphQL (nomClient -> clientNom)
+    public void setNomClient(String nomClient) {
+        this.clientNom = nomClient;
+    }
+
     public String getClientPrenom() {
         return clientPrenom;
     }
@@ -39,6 +44,11 @@ public class ReservationRequest {
 
     public void setClientPrenom(String clientPrenom) {
         this.clientPrenom = clientPrenom;
+    }
+
+    // Setter pour GraphQL (prenomClient -> clientPrenom)
+    public void setPrenomClient(String prenomClient) {
+        this.clientPrenom = prenomClient;
     }
 
     public String getClientEmail() {
@@ -54,6 +64,11 @@ public class ReservationRequest {
         this.clientEmail = clientEmail;
     }
 
+    // Setter pour GraphQL (emailClient -> clientEmail)
+    public void setEmailClient(String emailClient) {
+        this.clientEmail = emailClient;
+    }
+
     public String getClientTelephone() {
         return clientTelephone;
     }
@@ -65,6 +80,11 @@ public class ReservationRequest {
 
     public void setClientTelephone(String clientTelephone) {
         this.clientTelephone = clientTelephone;
+    }
+
+    // Setter pour GraphQL (telephoneClient -> clientTelephone)
+    public void setTelephoneClient(String telephoneClient) {
+        this.clientTelephone = telephoneClient;
     }
 
     public String getClientNumeroCarteBleue() {

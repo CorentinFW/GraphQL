@@ -71,49 +71,42 @@ public class MultiAgenceGraphQLClient {
 
     /**
      * Rechercher des chambres disponibles dans TOUTES les agences via GraphQL
-     * Retourne TOUTES les chambres, y compris les doublons (même chambre proposée par plusieurs agences)
+     * VERSION SÉQUENTIELLE pour éviter les problèmes de concurrence
      */
     public List<ChambreDTO> rechercherChambres(String adresse, String dateArrive, String dateDepart,
                                                Float prixMin, Float prixMax, Integer nbrEtoile, Integer nbrLits) {
-        System.out.println("🔍 Recherche GraphQL dans " + agenceGraphQLUrls.size() + " agences en parallèle...");
+        System.out.println("🔍 Recherche GraphQL SÉQUENTIELLE dans " + agenceGraphQLUrls.size() + " agences...");
 
-        // Créer des tâches asynchrones pour chaque agence
-        List<CompletableFuture<List<ChambreDTO>>> futures = agenceGraphQLUrls.stream()
-            .map(agenceGraphQLUrl -> CompletableFuture.supplyAsync(() -> {
-                try {
-                    List<ChambreDTO> chambres = agenceGraphQLClient.rechercherChambres(
-                        agenceGraphQLUrl,
-                        adresse,
-                        dateArrive,
-                        dateDepart,
-                        prixMin,
-                        prixMax,
-                        nbrEtoile,
-                        nbrLits
-                    );
+        List<ChambreDTO> toutesLesChambres = new ArrayList<>();
 
-                    if (!chambres.isEmpty()) {
-                        System.out.println("✓ [" + agenceGraphQLUrl + "] Trouvé " + chambres.size() + " chambre(s)");
-                    } else {
-                        System.out.println("○ [" + agenceGraphQLUrl + "] Aucune chambre disponible");
-                    }
+        // Traiter chaque agence UNE PAR UNE (séquentiellement)
+        for (String agenceGraphQLUrl : agenceGraphQLUrls) {
+            try {
+                System.out.println("  → Interrogation agence: " + agenceGraphQLUrl);
 
-                    return chambres;
+                List<ChambreDTO> chambres = agenceGraphQLClient.rechercherChambres(
+                    agenceGraphQLUrl,
+                    adresse,
+                    dateArrive,
+                    dateDepart,
+                    prixMin,
+                    prixMax,
+                    nbrEtoile,
+                    nbrLits
+                );
 
-                } catch (Exception e) {
-                    System.err.println("✗ [" + agenceGraphQLUrl + "] Erreur: " + e.getMessage());
-                    e.printStackTrace();
-                    return Collections.<ChambreDTO>emptyList();
+                if (!chambres.isEmpty()) {
+                    System.out.println("    ✓ Trouvé " + chambres.size() + " chambre(s)");
+                    toutesLesChambres.addAll(chambres);
+                } else {
+                    System.out.println("    ○ Aucune chambre disponible");
                 }
-            }))
-            .collect(Collectors.toList());
 
-        // Attendre que toutes les tâches se terminent et agréger les résultats
-        // On garde TOUS les résultats, même les doublons
-        List<ChambreDTO> toutesLesChambres = futures.stream()
-            .map(CompletableFuture::join)
-            .flatMap(List::stream)
-            .collect(Collectors.toList());
+            } catch (Exception e) {
+                System.err.println("    ✗ Erreur: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
 
         System.out.println("✅ Total: " + toutesLesChambres.size() + " chambre(s) disponible(s) via GraphQL");
 
@@ -183,6 +176,65 @@ public class MultiAgenceGraphQLClient {
      */
     public String getAgence2Name() {
         return agence2Name;
+    }
+
+    /**
+     * Obtenir toutes les réservations de toutes les agences
+     */
+    public Map<String, List<Map<String, Object>>> getAllReservations() {
+        System.out.println("📋 Récupération de toutes les réservations...");
+
+        Map<String, List<Map<String, Object>>> allReservations = new LinkedHashMap<>();
+
+        // Pour chaque agence
+        for (String agenceGraphQLUrl : agenceGraphQLUrls) {
+            try {
+                List<Map<String, Object>> reservations = agenceGraphQLClient.getToutesReservations(agenceGraphQLUrl);
+
+                String agenceName = agenceGraphQLUrl.contains("8081") ? agence1Name : agence2Name;
+                allReservations.put(agenceName, reservations);
+
+                System.out.println("✓ [" + agenceName + "] " + reservations.size() + " réservation(s)");
+            } catch (Exception e) {
+                System.err.println("✗ [" + agenceGraphQLUrl + "] Erreur: " + e.getMessage());
+            }
+        }
+
+        return allReservations;
+    }
+
+    /**
+     * Obtenir la liste des hôtels disponibles
+     */
+    public List<Map<String, Object>> getAllHotels() {
+        System.out.println("🏨 Récupération de la liste des hôtels...");
+
+        List<Map<String, Object>> allHotels = new ArrayList<>();
+        Set<String> hotelNames = new HashSet<>();
+
+        // Pour chaque agence
+        for (String agenceGraphQLUrl : agenceGraphQLUrls) {
+            try {
+                List<Map<String, Object>> hotels = agenceGraphQLClient.getHotels(agenceGraphQLUrl);
+
+                for (Map<String, Object> hotel : hotels) {
+                    String hotelName = (String) hotel.get("nom");
+                    // Éviter les doublons (Lyon est dans les 2 agences)
+                    if (hotelName != null && !hotelNames.contains(hotelName)) {
+                        hotelNames.add(hotelName);
+                        allHotels.add(hotel);
+                    }
+                }
+
+                System.out.println("✓ [" + agenceGraphQLUrl + "] " + hotels.size() + " hôtel(s)");
+            } catch (Exception e) {
+                System.err.println("✗ [" + agenceGraphQLUrl + "] Erreur: " + e.getMessage());
+            }
+        }
+
+        System.out.println("✅ Total: " + allHotels.size() + " hôtel(s) unique(s)");
+
+        return allHotels;
     }
 }
 

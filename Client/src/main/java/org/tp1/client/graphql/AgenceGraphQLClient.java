@@ -265,5 +265,102 @@ public class AgenceGraphQLClient {
 
         return dto;
     }
+
+    /**
+     * Obtenir toutes les réservations de l'agence
+     */
+    public List<Map<String, Object>> getToutesReservations(String agenceGraphQLUrl) {
+        try {
+            String query = """
+                query {
+                  toutesReservations {
+                    id
+                    chambreId
+                    hotelNom
+                    nomClient
+                    prenomClient
+                    emailClient
+                    telephoneClient
+                    dateArrive
+                    dateDepart
+                    prixTotal
+                  }
+                }
+                """;
+
+            Map<String, Object> requestBody = Map.of("query", query);
+
+            WebClient webClient = webClientBuilder.baseUrl(agenceGraphQLUrl).build();
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> response = webClient.post()
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
+
+            if (response != null && response.containsKey("data")) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> data = (Map<String, Object>) response.get("data");
+
+                if (data.containsKey("toutesReservations")) {
+                    @SuppressWarnings("unchecked")
+                    List<Map<String, Object>> reservations = (List<Map<String, Object>>) data.get("toutesReservations");
+                    return reservations;
+                }
+            }
+
+            return Collections.emptyList();
+
+        } catch (Exception e) {
+            System.err.println("❌ Erreur lors de la récupération des réservations: " + e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Obtenir la liste des hôtels partenaires de l'agence
+     */
+    public List<Map<String, Object>> getHotels(String agenceGraphQLUrl) {
+        try {
+            String query = """
+                query {
+                  hotelsPartenaires {
+                    nom
+                    adresse
+                    ville
+                  }
+                }
+                """;
+
+            Map<String, Object> requestBody = Map.of("query", query);
+
+            WebClient webClient = webClientBuilder.baseUrl(agenceGraphQLUrl).build();
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> response = webClient.post()
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
+
+            if (response != null && response.containsKey("data")) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> data = (Map<String, Object>) response.get("data");
+
+                if (data.containsKey("hotelsPartenaires")) {
+                    @SuppressWarnings("unchecked")
+                    List<Map<String, Object>> hotels = (List<Map<String, Object>>) data.get("hotelsPartenaires");
+                    return hotels;
+                }
+            }
+
+            return Collections.emptyList();
+
+        } catch (Exception e) {
+            System.err.println("❌ Erreur lors de la récupération des hôtels: " + e.getMessage());
+            return Collections.emptyList();
+        }
+    }
 }
 

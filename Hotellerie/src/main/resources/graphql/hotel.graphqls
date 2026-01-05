@@ -34,7 +34,7 @@ type Chambre {
     nom: String!
     prix: Float!
     nbrDeLit: Int!
-    nbrEtoile: Int!
+    nbrEtoiles: Int!
     disponible: Boolean!
     imageUrl: String
     hotelNom: String

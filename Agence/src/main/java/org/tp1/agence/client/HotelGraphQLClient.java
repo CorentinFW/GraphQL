@@ -28,9 +28,10 @@ public class HotelGraphQLClient {
     public List<ChambreDTO> rechercherChambres(String hotelGraphQLUrl, RechercheRequest request) {
         try {
             // Construction de la query GraphQL
+            // NE PAS envoyer l'adresse - on filtre côté agence après
             String query = "query {" +
                 "  rechercherChambres(criteres: {" +
-                "    adresse: \"" + (request.getAdresse() != null ? request.getAdresse() : "") + "\"" +
+                "    adresse: \"\"" +  // Toujours vide pour récupérer toutes les chambres
                 "    dateArrive: \"" + request.getDateArrive() + "\"" +
                 "    dateDepart: \"" + request.getDateDepart() + "\"" +
                 "    prixMin: " + (request.getPrixMin() != null ? request.getPrixMin() : "null") +
@@ -42,9 +43,10 @@ public class HotelGraphQLClient {
                 "    nom" +
                 "    prix" +
                 "    nbrDeLit" +
-                "    nbrEtoile" +
+                "    nbrEtoiles" +
                 "    disponible" +
                 "    imageUrl" +
+                "    hotelNom" +
                 "  }" +
                 "}";
 
@@ -220,13 +222,14 @@ public class HotelGraphQLClient {
         if (map.get("nbrDeLit") != null) {
             dto.setNbrLits(((Number) map.get("nbrDeLit")).intValue());
         }
-        if (map.get("nbrEtoile") != null) {
-            dto.setNbrEtoiles(((Number) map.get("nbrEtoile")).intValue());
+        if (map.get("nbrEtoiles") != null) {
+            dto.setNbrEtoiles(((Number) map.get("nbrEtoiles")).intValue());
         }
         if (map.get("disponible") != null) {
             dto.setDisponible((Boolean) map.get("disponible"));
         }
         dto.setImage((String) map.get("imageUrl"));
+        dto.setHotelNom((String) map.get("hotelNom"));
 
         return dto;
     }

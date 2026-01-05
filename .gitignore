@@ -1,104 +1,33 @@
-# Maven
+# Dossiers de build Maven
 **/target/
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+
+# Fichiers de logs
+logs/
+*.log
+
+# Bases de données H2
+**/data/*.db
+**/data/*.mv.db
+**/data/*.trace.db
 
 # IDE - IntelliJ IDEA
 .idea/
-*.iws
 *.iml
+*.iws
 *.ipr
-out/
 
 # IDE - Eclipse
-.project
 .classpath
+.project
 .settings/
-bin/
-.metadata/
-.recommenders/
 
 # IDE - VSCode
 .vscode/
-*.code-workspace
 
-# IDE - NetBeans
-nbproject/private/
-nbbuild/
-dist/
-nbdist/
-.nb-gradle/
-
-# Compiled class files
-*.class
-
-# Log files
-*.log
-logs/
-*.log.*
-
-# Package Files
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# H2 Database files
-*.db
-*.mv.db
-*.trace.db
-data/*.db
-data/*.mv.db
-data/*.trace.db
-
-# Spring Boot
-spring-boot-*.log
-
-# OS Files
+# OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
-*~
 
-# Temporary files
-*.tmp
-*.temp
-*.swp
-*.swo
-*.bak
-*.old
-
-# Build artifacts
-build/
-dist/
-*.class
-
-# Maven Wrapper
+# Maven
 .mvn/wrapper/maven-wrapper.jar
-.mvn/timing.properties
-.mvn/wrapper/MavenWrapperDownloader.java
-
-# Spring Boot DevTools
-.spring-boot-devtools.properties
-
-# Test coverage
-coverage/
-.nyc_output/
-
-# Application specific
-nohup.out
-*.pid
-
-# Backup files
-*.old
-*~.nib
 

@@ -31,8 +31,10 @@ check_backend_service() {
     local PORT=$1
     local NAME=$2
 
-    if curl -s --max-time 2 "http://localhost:$PORT/api/hotel/info" >/dev/null 2>&1 || \
-       curl -s --max-time 2 "http://localhost:$PORT/api/agence/ping" >/dev/null 2>&1; then
+    # Vérifier GraphQL endpoint
+    if curl -s --max-time 2 -X POST http://localhost:$PORT/graphql \
+       -H "Content-Type: application/json" \
+       -d '{"query":"{__typename}"}' 2>/dev/null | grep -q "data"; then
         echo "   ✅ $NAME (port $PORT) - Opérationnel"
         return 0
     else

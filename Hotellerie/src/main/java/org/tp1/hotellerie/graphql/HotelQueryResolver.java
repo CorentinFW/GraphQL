@@ -64,15 +64,19 @@ public class HotelQueryResolver {
 
         // Convertir les Chambres en ChambreDTO
         return chambres.stream()
-            .map(chambre -> new ChambreDTO(
-                chambre.getId(),
-                chambre.getNom(),
-                chambre.getPrix(),
-                chambre.getNbrDeLit(),
-                hotel.getType().ordinal() + 1, // Nombre d'étoiles
-                true, // Disponible si dans les résultats
-                chambre.getImageUrl()
-            ))
+            .map(chambre -> {
+                ChambreDTO dto = new ChambreDTO(
+                    chambre.getId(),
+                    chambre.getNom(),
+                    chambre.getPrix(),
+                    chambre.getNbrDeLit(),
+                    hotel.getType().ordinal() + 1, // Nombre d'étoiles
+                    true, // Disponible si dans les résultats
+                    chambre.getImageUrl()
+                );
+                dto.setHotelNom(hotel.getNom());
+                return dto;
+            })
             .collect(Collectors.toList());
     }
 
@@ -94,7 +98,7 @@ public class HotelQueryResolver {
             Chambre chambre = chambreOpt.get();
             Hotel hotel = hotelService.getHotel();
 
-            return new ChambreDTO(
+            ChambreDTO dto = new ChambreDTO(
                 chambre.getId(),
                 chambre.getNom(),
                 chambre.getPrix(),
@@ -103,6 +107,8 @@ public class HotelQueryResolver {
                 true,
                 chambre.getImageUrl()
             );
+            dto.setHotelNom(hotel.getNom());
+            return dto;
         } catch (NumberFormatException e) {
             return null;
         }

@@ -6,7 +6,7 @@
 
 echo "╔═══════════════════════════════════════════════════════════════╗"
 echo "║                                                               ║"
-echo "║   REDÉMARRAGE - CONSERVATION DES DONNÉES                      ║"
+echo "║   REDÉMARRAGE GraphQL - CONSERVATION DES DONNÉES             ║"
 echo "║                                                               ║"
 echo "╚═══════════════════════════════════════════════════════════════╝"
 echo ""
@@ -29,9 +29,10 @@ check_service() {
     echo "   Vérification du démarrage..."
 
     for i in {1..30}; do
-        if curl -s http://localhost:$PORT/actuator/health >/dev/null 2>&1 || \
-           curl -s http://localhost:$PORT/api/hotel/info >/dev/null 2>&1 || \
-           curl -s http://localhost:$PORT/api/agence/ping >/dev/null 2>&1; then
+        # Vérifier GraphQL endpoint
+        if curl -s -X POST http://localhost:$PORT/graphql \
+           -H "Content-Type: application/json" \
+           -d '{"query":"{__typename}"}' | grep -q "data" 2>/dev/null; then
             echo "   ✅ $SERVICE_NAME démarré avec succès (port $PORT)"
             return 0
         fi

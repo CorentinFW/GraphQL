@@ -58,5 +58,12 @@ public class AgenceService {
             return ReservationResponse.error("Erreur lors de la réservation: " + e.getMessage());
         }
     }
+
+    /**
+     * Obtenir la liste des hôtels partenaires
+     */
+    public List<java.util.Map<String, Object>> getHotelsPartenaires() {
+        return multiHotelGraphQLClient.getAllHotelsInfo();
+    }
 }
 
