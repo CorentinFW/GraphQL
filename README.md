@@ -1,278 +1,307 @@
-# 🏨 Système de Réservation Multi-Agences En reste
+# 🏨 Système de Réservation Multi-Agences GraphQL
 
-## 🚀 DÉMARRAGE RAPIDE (1 Commande)
+## 📖 Description
 
-### Option 1 : Avec conservation des données (recommandé)
+Système distribué de réservation de chambres d'hôtel utilisant **GraphQL** pour la communication entre les services. Le projet permet la recherche et la réservation de chambres via une interface graphique Swing, en interrogeant plusieurs agences qui communiquent avec leurs hôtels partenaires via GraphQL.
+
+**Architecture distribuée :**
+- 3 hôtels (Paris, Lyon, Montpellier) exposant des APIs GraphQL
+- 2 agences (Paris Voyages, Sud Réservations) agrégeant les données via GraphQL
+- 1 client GUI (Swing) consommant les APIs GraphQL des agences
+- Bases de données H2 embarquées pour la persistance
+
+---
+
+## 🚀 Quick Start
+
+### Lancer tout le système
+
 ```bash
-./rest-restart.sh
+# Démarrage complet avec réinitialisation des bases de données H2
+./graphQL-restart.sh
+
+# OU : Démarrage sans réinitialisation (conserve les réservations)
+./graphQL-service.sh
 ```
 
-### Option 2 : Avec reset complet des bases de données
+**⏱️ Temps de démarrage :** ~30 secondes
+
+**✅ Résultat :** Une fenêtre graphique s'ouvre avec les 20 chambres disponibles !
+
+### Lancer uniquement le client
+
 ```bash
-./rest-all-restart.sh
+# Les services backend doivent être déjà lancés
+./graphQL-client.sh
 ```
 
-### Option 3 : Lancer uniquement l'interface graphique
-```bash
-./rest-client.sh           # Les services backend doivent être déjà lancés
-```
+### Arrêter le système
 
-**Temps : ~60 secondes → Une fenêtre graphique s'ouvre avec 20 chambres disponibles !**
-
-**Pour arrêter :**
 ```bash
-./arreter-services.sh
+./arret-graphQL.sh
 ```
 
 ---
 
-## 📋 Prérequis
+## 🖥️ Interface Swing - Guide d'utilisation
 
-- ✅ Java 11+ 
-- ✅ Maven 3.6+
-- ✅ Ubuntu avec interface graphique (ou tout OS avec X11)
+### 1. Rechercher des chambres
+
+1. **Remplir les critères de recherche :**
+   - Ville (optionnel) : Lyon, Paris, Montpellier
+   - Date d'arrivée (obligatoire)
+   - Date de départ (obligatoire)
+   - Nombre de personnes (optionnel)
+   - Prix maximum (optionnel)
+
+2. **Cliquer sur "🔍 Rechercher"**
+
+3. **Les résultats s'affichent dans le tableau** avec :
+   - Nom de la chambre
+   - Hôtel et adresse
+   - Prix total
+   - Agence proposant l'offre
+
+**Exemple :** Recherche "Lyon" du 2025-11-11 au 2025-11-15 → 10 chambres trouvées
+
+### 2. Réserver une chambre
+
+1. **Sélectionner une chambre** dans le tableau (clic simple)
+2. **Cliquer sur "📝 Réserver"** (ou double-clic sur la ligne)
+3. **Remplir le formulaire de réservation :**
+   - Nom (obligatoire)
+   - Prénom (obligatoire)
+   - Email (obligatoire)
+   - Téléphone (optionnel)
+   - Moyen de paiement (obligatoire)
+4. **Valider**
+
+→ Confirmation instantanée avec le numéro de réservation !
+
+### 3. Voir les réservations
+
+1. **Cliquer sur "👁️ Voir Réservations"** (ou menu Actions → Voir réservations)
+2. **Toutes les réservations s'affichent** avec :
+   - ID de réservation
+   - Client (nom, prénom)
+   - Hôtel
+   - Dates
+   - Prix total
+
+### 4. Raccourcis clavier
+
+- **Ctrl+R** : Rechercher
+- **Ctrl+B** : Réserver
+- **Ctrl+V** : Voir les réservations
+- **Ctrl+Q** : Quitter
 
 ---
 
-## Architecture
+## 📁 Structure du Projet
 
 ```
-CLIENT GUI (Interface Swing)
-      │
-      ├──> AGENCE 1 (Paris Voyages - 8081)
-      │    ├─> Hôtel Paris (8082)
-      │    └─> Hôtel Lyon (8083) [Partagé]
-      │
-      └──> AGENCE 2 (Sud Réservations - 8085)
-           ├─> Hôtel Lyon (8083) [Partagé]
-           └─> Hôtel Montpellier (8084)
+GraphQL/
+├── Hotellerie/              # Module des hôtels (GraphQL Server)
+│   ├── src/main/
+│   │   ├── java/
+│   │   │   └── org/tp1/hotellerie/
+│   │   │       ├── controller/      # Resolvers GraphQL
+│   │   │       ├── service/         # Logique métier
+│   │   │       ├── model/           # Entités JPA
+│   │   │       ├── repository/      # DAO
+│   │   │       └── dto/             # DTOs GraphQL
+│   │   └── resources/
+│   │       ├── graphql/             # Schémas GraphQL (.graphqls)
+│   │       └── application*.properties
+│   └── data/                        # Bases H2 (lyon, paris, montpellier)
+│
+├── Agence/                  # Module des agences (GraphQL Server + Client)
+│   ├── src/main/
+│   │   ├── java/
+│   │   │   └── org/tp1/agence/
+│   │   │       ├── controller/      # Resolvers GraphQL
+│   │   │       ├── service/         # Agrégation GraphQL
+│   │   │       ├── graphql/         # Client GraphQL (vers hôtels)
+│   │   │       └── dto/             # DTOs
+│   │   └── resources/
+│   │       ├── graphql/             # Schémas GraphQL
+│   │       └── application*.properties
+│
+├── Client/                  # Module client GUI (GraphQL Client)
+│   ├── src/main/
+│   │   └── java/
+│   │       └── org/tp1/client/
+│   │           ├── gui/             # Interface Swing
+│   │           ├── graphql/         # Client GraphQL (vers agences)
+│   │           └── model/           # Modèles locaux
+│
+├── logs/                    # Logs des services
+├── old/                     # Anciens fichiers de migration
+│
+├── graphQL-restart.sh       # Démarrage complet (avec reset BDD)
+├── graphQL-service.sh       # Démarrage services (sans reset BDD)
+├── graphQL-client.sh        # Lancement client GUI uniquement
+└── arret-graphQL.sh         # Arrêt de tous les services
 ```
 
-**Résultat :** 20 chambres disponibles (5 Paris + 10 Lyon + 5 Montpellier)
+### Architecture distribuée
 
----
-
-## Utilisation de l'Interface
-
-### Recherche de Chambres
-
-1. Remplir le formulaire (ville, dates, critères)
-2. Cliquer sur "🔍 Rechercher"
-3. Les résultats apparaissent dans le tableau
-
-**Exemple :**
-- Ville : Lyon
-- Dates : 2025-12-01 → 2025-12-05
-- **Résultat : 10 chambres**
-
-### Afficher les Images
-
-**Cliquer sur l'icône 🖼 dans le tableau**
-
-→ Une fenêtre s'ouvre avec l'image de la chambre en grand format !
-
-### Réservation
-
-1. Sélectionner une chambre dans le tableau
-2. Double-cliquer ou bouton "📝 Réserver"
-3. Remplir le formulaire client
-4. Valider
-
-### Arrêter le Système
-
-```bash
-./arreter-services.sh
+```
+┌─────────────────────────────────────────────────────────┐
+│                   CLIENT GUI (Swing)                    │
+│              GraphQL Client (HTTP POST)                 │
+└──────────────────┬──────────────────┬───────────────────┘
+                   │                  │
+         ┌─────────▼────────┐  ┌──────▼──────────┐
+         │  AGENCE 1 :8081  │  │  AGENCE 2 :8085 │
+         │  Paris Voyages   │  │ Sud Réservations│
+         │ GraphQL Server   │  │ GraphQL Server  │
+         └─────┬─────┬──────┘  └──────┬────┬─────┘
+               │     │                │    │
+      ┌────────▼─┐ ┌─▼───────┐  ┌────▼──┐ │
+      │ HOTEL    │ │ HOTEL   │  │ HOTEL │ │
+      │ Paris    │ │ Lyon    │◄─┤ Lyon  │ │
+      │ :8082    │ │ :8083   │  │ :8083 │ │
+      │ GraphQL  │ │ GraphQL │  │       │ │
+      └──────────┘ └─────────┘  └───────┘ │
+                                           │
+                               ┌───────────▼────┐
+                               │ HOTEL          │
+                               │ Montpellier    │
+                               │ :8084          │
+                               │ GraphQL        │
+                               └────────────────┘
 ```
 
-### Menus
-
-- **Fichier** → Quitter
-- **Actions** → Rechercher (Ctrl+R), Réserver (Ctrl+B), Voir réservations (Ctrl+V)
-- **Aide** → À propos
-
----
+**Points clés :**
+- Hotel Lyon (:8083) est partagé entre les 2 agences
+- Communication 100% GraphQL (plus de REST)
+- Chaque service expose son propre schéma GraphQL
 
 ---
 
-## Fonctionnalités
+## ✨ Fonctionnalités
 
-### Interface Graphique Swing
+### ✅ Recherche de chambres
+- Critères multiples (ville, dates, prix, nombre de personnes)
+- Agrégation temps réel des résultats de plusieurs agences
+- Affichage comparatif des prix
 
-- Formulaire de recherche graphique
-- Tableau interactif des résultats
-- Réservation en quelques clics
-- Console de logs en temps réel
+### ✅ Réservation
+- Formulaire complet avec validation
+- Confirmation instantanée
+- Attribution d'un ID de réservation unique
+
+### ✅ Consultation des réservations
+- Liste complète des réservations effectuées
+- Détails complets (client, hôtel, dates, prix)
+
+### ✅ Interface utilisateur
+- Interface graphique Swing moderne
+- Console de logs intégrée
 - Menus et raccourcis clavier
-- Comparaison de prix multi-agences
+- Formulaires validés
 
-### Multi-Agences
-
-- 2 agences interrogées en parallèle
-- Comparaison de prix automatique
-- Hôtel Lyon partagé entre les 2 agences
-- Coefficients différents (1.15 vs 1.20)
-
-### Données
-
-- 3 hôtels (Paris, Lyon, Montpellier)
-- 5 chambres par hôtel
-- 20 chambres visibles au total
-- Images des chambres
+### ✅ Persistance
+- Bases de données H2 embarquées
+- 1 base par hôtel (lyon, paris, montpellier)
+- Données conservées entre les redémarrages
 
 ---
 
-## Arrêter le Système
+## 🛠️ Langages et Technologies
 
-### Fermer l'Interface
+### Backend
+- **Java 17** (compatible jusqu'à Java 21)
+- **Spring Boot 2.7.5**
+- **Spring for GraphQL 1.1.0** - Serveur GraphQL
+- **GraphQL Java** - Implémentation GraphQL
+- **H2 Database** - Base de données embarquée
+- **Spring Data JPA** - Persistance
+- **Lombok** - Réduction du code boilerplate
+- **Maven** - Gestion des dépendances
 
-Cliquer sur la croix (X) de la fenêtre.
+### Frontend
+- **Java Swing** - Interface graphique
+- **HTTP Client (java.net.http)** - Client GraphQL
 
-### Arrêter les Services Backend
+### GraphQL
+- **Queries** : Recherche de chambres, consultation de réservations
+- **Mutations** : Création de réservations
+- **Schema-First Design** : Fichiers `.graphqls`
+
+### DevOps
+- **Bash Scripts** - Automatisation du démarrage/arrêt
+- **Logs** - Fichiers de logs dédiés par service
+
+---
+
+## 📊 Ports et Services
+
+| Service | Port | Type | GraphQL Endpoint |
+|---------|------|------|------------------|
+| Hotel Paris | 8082 | Server | http://localhost:8082/graphql |
+| Hotel Lyon | 8083 | Server | http://localhost:8083/graphql |
+| Hotel Montpellier | 8084 | Server | http://localhost:8084/graphql |
+| Agence Paris Voyages | 8081 | Server | http://localhost:8081/graphql |
+| Agence Sud Réservations | 8085 | Server | http://localhost:8085/graphql |
+| Client GUI | - | Client | Consomme les agences |
+
+---
+
+## 📝 Logs
+
+Les logs de chaque service sont disponibles dans le dossier `logs/` :
 
 ```bash
-pkill -f 'java.*Agence'
-pkill -f 'java.*Hotellerie'
-```
-
----
-
-## Documentation
-
-- **GUIDE-FINAL-DEMARRAGE.md** - Guide complet de démarrage
-- **OverFile/AllReadme/** - Toute la documentation du projet
-- **DIAGNOSTIC-COMPLET-CLIENT.md** - Diagnostic et dépannage
-
----
-
-**Logs dans :** `logs/*.log`
-
-
-### Recompiler Après Modifications
-
-```bash
-./compile-all.sh
-```
-
----
-
-## Test de Fonctionnement
-
-### Test 1 : Recherche Lyon
-
-**Critères :**
-- Ville : Lyon
-- Dates : 2025-12-01 → 2025-12-05
-
-**Résultat attendu :** 10 chambres
-
-### Test 2 : Recherche Paris
-
-**Critères :**
-- Ville : Paris
-- Dates : 2025-12-01 → 2025-12-05
-
-**Résultat attendu :** 5 chambres (via Agence 1 uniquement)
-
-### Test 3 : Recherche Sans Critère
-
-**Critères :**
-- Aucun critère
-- Dates : 2025-12-01 → 2025-12-05
-
-**Résultat attendu :** 20 chambres
-
-
----
-
-### Problème : "BUILD FAILURE"
-
-**Cause :** Erreur de compilation
-
-**Solution :**
-```bash
-# Nettoyer et recompiler
-cd Hotellerie && mvn clean && cd ..
-cd Agence && mvn clean && cd ..
-cd Client && mvn clean && cd ..
-./compile-all.sh
-```
-
-### Problème : "HeadlessException"
-
-**Cause :** Mode headless activé
-
-**Solution :** Déjà corrigé dans le code. Si persiste :
-```bash
-export DISPLAY=:0
-./start-system-complete-gui.sh
-```
-
----
-
-## 📊 Ports Utilisés
-
-| Service | Port | Description |
-|---------|------|-------------|
-| Hôtel Paris | 8082 | 5 chambres |
-| Hôtel Lyon | 8083 | 5 chambres |
-| Hôtel Montpellier | 8084 | 5 chambres |
-| Agence 1 | 8081 | Paris + Lyon (coef 1.15) |
-| Agence 2 | 8085 | Lyon + Montpellier (coef 1.20) |
-
----
-
-## Version
-
-- **Version :** 2.0 - Interface Graphique Swing
-- **Date :** 26 novembre 2025
-- **Architecture :** REST avec Spring Boot
-- **Interface :** Java Swing
-- **Statut :** ✅ Production Ready
-
----
-
-## COMMANDES ESSENTIELLES
-
-```bash
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#  DÉMARRAGE (3 SCRIPTS CONSOLIDÉS)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-# 1. Redémarrage COMPLET (hôtels + agences + client + BDD RESET)
-./rest-all-restart.sh
-
-# 2. Redémarrage avec PERSISTANCE (hôtels + agences + client + BDD conservée)
-./rest-restart.sh              # ⭐ RECOMMANDÉ pour usage normal
-
-# 3. Client GUI uniquement (backend doit être déjà lancé)
-./rest-client.sh
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# ARRÊT
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-# Arrêter tous les services proprement
-./arreter-services.sh
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# LOGS
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 # Voir les logs en temps réel
 tail -f logs/hotel-paris.log
+tail -f logs/hotel-lyon.log
+tail -f logs/hotel-montpellier.log
 tail -f logs/agence1.log
-tail -f logs/client-gui.log      # Nouveau : logs du client GUI
+tail -f logs/agence2.log
+tail -f logs/client-gui.log
+```
 
-# Avec coloration (si ccze installé)
-tail -f logs/hotel-paris.log | ccze -A
+---
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# MAINTENANCE
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 🔧 Maintenance
 
-# Compiler tous les modules (si Problème)
+### Recompiler les modules
+
+```bash
+# Recompilation complète
 cd Hotellerie && mvn clean package -DskipTests && cd ..
 cd Agence && mvn clean package -DskipTests && cd ..
 cd Client && mvn clean package -DskipTests && cd ..
 ```
+
+### Réinitialiser les bases de données
+
+```bash
+# Suppression des fichiers H2
+rm -f Hotellerie/data/*.db
+
+# Relancer avec réinitialisation
+./graphQL-restart.sh
+```
+
+---
+
+## 📚 Documentation
+
+Consultez le dossier `old/` pour les fichiers de migration et documentation technique :
+- Guides de migration REST → GraphQL
+- Notes techniques sur l'implémentation
+- Scripts de test
+
+---
+
+## ✅ Version
+
+- **Version :** 3.0 - Architecture GraphQL
+- **Date :** Janvier 2026
+- **Architecture :** GraphQL avec Spring Boot
+- **Interface :** Java Swing
+- **Statut :** ✅ Production Ready
 

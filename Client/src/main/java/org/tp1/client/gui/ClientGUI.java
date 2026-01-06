@@ -334,7 +334,7 @@ public class ClientGUI {
         new SwingWorker<List<ChambreDTO>, Void>() {
             @Override
             protected List<ChambreDTO> doInBackground() throws Exception {
-                log("   Appel du client REST...");
+                log("   Appel du client graphQL...");
                 List<ChambreDTO> result = agenceGraphQLClient.rechercherChambres(
                     adresse, dateArrivee, dateDepart,
                     prixMin, prixMax, nbrEtoiles, nbrLits
@@ -895,7 +895,7 @@ public class ClientGUI {
     private void afficherAPropos() {
         String message = "Système de Réservation Multi-Agences\n\n" +
                         "Version 2.0 - Interface Graphique\n" +
-                        "Architecture REST avec Spring Boot\n\n" +
+                        "Architecture graphQL avec Spring Boot\n\n" +
                         "Fonctionnalités:\n" +
                         "• Recherche de chambres multi-agences\n" +
                         "• Comparaison de prix en temps réel\n" +
