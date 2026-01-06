@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 /**
  * Resolver GraphQL pour les queries (lecture de données)
- * Remplace les endpoints GET du HotelController REST
  */
 @Controller
 public class HotelQueryResolver {
@@ -47,7 +46,6 @@ public class HotelQueryResolver {
     /**
      * Query: rechercherChambres
      * Recherche des chambres disponibles selon des critères
-     * Remplace: POST /api/hotel/chambres/rechercher
      */
     @QueryMapping
     public List<ChambreDTO> rechercherChambres(@Argument RechercheRequest criteres) {

@@ -224,7 +224,7 @@ public class HotelService {
      * Effectue une réservation - TOUT EN BDD
      */
     @Transactional
-    public ReservationResult effectuerReservation(Client client, long chambreId, String dateArrive, String dateDepart, String agenceId) {
+    public ReservationResult effectuerReservation(Client client, long chambreId, String dateArrive, String dateDepart, String agenceId, Float prixAvecCoefficient) {
         // Vérifier que le client est valide
         if (client == null || client.getNom() == null || client.getNom().isEmpty()) {
             return new ReservationResult(0, false, "Client invalide");
@@ -274,6 +274,7 @@ public class HotelService {
         Reservation reservation = new Reservation(numeroReservation, clientDB, chambre, arrive, depart);
         reservation.setHotel(hotel);
         reservation.setAgenceId(agenceId);  // Stocker l'agenceId
+        reservation.setPrixAvecCoefficient(prixAvecCoefficient);  // Stocker le prix avec coefficient
         reservation = reservationRepository.save(reservation);
 
         return new ReservationResult(numeroReservation, true, "Réservation effectuée avec succès");
@@ -413,11 +414,18 @@ public class HotelService {
                 dto.setDateDepart(new java.text.SimpleDateFormat("yyyy-MM-dd").format(reservation.getDateDepart()));
             }
 
-            // Calculer prix total (prix chambre * nombre de jours)
+            // Calculer prix total (prix avec coefficient × nombre de nuits)
             if (reservation.getChambre() != null && reservation.getDateArrive() != null && reservation.getDateDepart() != null) {
                 long diffInMillies = Math.abs(reservation.getDateDepart().getTime() - reservation.getDateArrive().getTime());
-                long diffInDays = diffInMillies / (1000 * 60 * 60 * 24);
-                dto.setPrixTotal(reservation.getChambre().getPrix() * diffInDays);
+                long diffInDays = diffInMillies / (1000L * 60L * 60L * 24L);
+
+                // Utiliser le prix avec coefficient si disponible, sinon le prix de base
+                float prixParNuit = (reservation.getPrixAvecCoefficient() != null)
+                    ? reservation.getPrixAvecCoefficient()
+                    : reservation.getChambre().getPrix();
+
+                float prixTotal = prixParNuit * diffInDays;
+                dto.setPrixTotal(prixTotal);
             }
 
             // Mapper agenceId

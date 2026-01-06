@@ -40,6 +40,9 @@ public class Reservation {
     @Column(name = "agence_id")
     private String agenceId;  // Identifiant de l'agence qui a effectué la réservation
 
+    @Column(name = "prix_avec_coefficient")
+    private Float prixAvecCoefficient;  // Prix par nuit avec coefficient de l'agence (pour calcul du prix total)
+
     // Constructeur par défaut requis par JPA
     public Reservation() {
     }
@@ -114,5 +117,13 @@ public class Reservation {
 
     public void setAgenceId(String agenceId) {
         this.agenceId = agenceId;
+    }
+
+    public Float getPrixAvecCoefficient() {
+        return prixAvecCoefficient;
+    }
+
+    public void setPrixAvecCoefficient(Float prixAvecCoefficient) {
+        this.prixAvecCoefficient = prixAvecCoefficient;
     }
 }

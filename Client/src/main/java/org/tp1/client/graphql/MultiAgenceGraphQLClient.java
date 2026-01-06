@@ -121,7 +121,8 @@ public class MultiAgenceGraphQLClient {
                                                     String clientEmail, String clientTelephone,
                                                     String numeroCarteBancaire, Long chambreId,
                                                     String hotelAdresse, String dateArrive,
-                                                    String dateDepart, String agenceNom) {
+                                                    String dateDepart, String agenceNom,
+                                                    Float prixAvecCoefficient) {
         // Trouver l'URL GraphQL de l'agence correspondante
         String targetAgenceGraphQLUrl = null;
 
@@ -152,7 +153,8 @@ public class MultiAgenceGraphQLClient {
             chambreId,
             hotelAdresse,
             dateArrive,
-            dateDepart
+            dateDepart,
+            prixAvecCoefficient
         );
 
         if (response.isSuccess()) {

@@ -11,6 +11,7 @@ public class ReservationRequest {
     private String dateArrive;
     private String dateDepart;
     private String agenceId;  // Identifiant de l'agence qui effectue la réservation
+    private Float prixAvecCoefficient;  // Prix par nuit avec coefficient de l'agence
 
     public ReservationRequest() {
     }
@@ -139,6 +140,14 @@ public class ReservationRequest {
 
     public void setAgenceId(String agenceId) {
         this.agenceId = agenceId;
+    }
+
+    public Float getPrixAvecCoefficient() {
+        return prixAvecCoefficient;
+    }
+
+    public void setPrixAvecCoefficient(Float prixAvecCoefficient) {
+        this.prixAvecCoefficient = prixAvecCoefficient;
     }
 }
 

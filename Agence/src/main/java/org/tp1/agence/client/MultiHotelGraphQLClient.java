@@ -196,6 +196,7 @@ public class MultiHotelGraphQLClient {
         System.out.println("   - dateArrive: " + request.getDateArrive());
         System.out.println("   - dateDepart: " + request.getDateDepart());
         System.out.println("   - hotelAdresse: " + request.getHotelAdresse());
+        System.out.println("   - prixAvecCoefficient: " + request.getPrixAvecCoefficient());
         System.out.println("   - agenceId: " + agenceId);
 
         // Ajouter l'agenceId à la requête

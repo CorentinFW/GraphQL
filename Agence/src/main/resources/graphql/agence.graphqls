@@ -82,6 +82,7 @@ input ReservationAgenceInput {
     numeroCarteBancaire: String
     dateArrive: String!
     dateDepart: String!
+    prixAvecCoefficient: Float  # Prix par nuit avec coefficient de l'agence
 }
 
 type ReservationResponse {

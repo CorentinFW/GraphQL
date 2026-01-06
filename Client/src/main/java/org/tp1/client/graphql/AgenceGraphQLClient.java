@@ -150,7 +150,8 @@ public class AgenceGraphQLClient {
                                                     String clientPrenom, String clientEmail,
                                                     String clientTelephone, String numeroCarteBancaire,
                                                     Long chambreId, String hotelAdresse,
-                                                    String dateArrive, String dateDepart) {
+                                                    String dateArrive, String dateDepart,
+                                                    Float prixAvecCoefficient) {
         System.out.println("╔══════════════════════════════════════════════════════════════════════════════════╗");
         System.out.println("║ 🔥🔥🔥 NOUVEAU CODE CHARGÉ - VERSION AVEC GESTION D'ERREURS 🔥🔥🔥              ║");
         System.out.println("╚══════════════════════════════════════════════════════════════════════════════════╝");
@@ -169,6 +170,7 @@ public class AgenceGraphQLClient {
                     numeroCarteBancaire: "%s"
                     dateArrive: "%s"
                     dateDepart: "%s"
+                    prixAvecCoefficient: %s
                   }) {
                     success
                     message
@@ -185,7 +187,8 @@ public class AgenceGraphQLClient {
                 clientTelephone != null ? clientTelephone : "",
                 numeroCarteBancaire != null ? numeroCarteBancaire : "",
                 dateArrive,
-                dateDepart
+                dateDepart,
+                prixAvecCoefficient != null ? prixAvecCoefficient : "null"
             );
 
             Map<String, Object> requestBody = Map.of("query", mutation);

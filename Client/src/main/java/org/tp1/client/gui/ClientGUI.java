@@ -614,7 +614,8 @@ public class ClientGUI {
                     chambre.getHotelAdresse(),
                     dateArr,
                     dateDep,
-                    chambre.getAgenceNom()
+                    chambre.getAgenceNom(),
+                    chambre.getPrix()  // Prix avec coefficient de l'agence
                 );
             }
 

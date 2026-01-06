@@ -10,7 +10,6 @@ import org.tp1.agence.service.AgenceService;
 
 /**
  * Resolver GraphQL pour les mutations de l'agence
- * Remplace les endpoints POST/PUT/DELETE du AgenceController REST
  */
 @Controller
 public class AgenceMutationResolver {

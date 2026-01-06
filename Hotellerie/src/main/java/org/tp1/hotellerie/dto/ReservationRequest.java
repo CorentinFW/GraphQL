@@ -12,6 +12,7 @@ public class ReservationRequest {
     private String prenomClient;
     private String numeroCarteBancaire;
     private String agenceId;  // Identifiant de l'agence qui effectue la réservation
+    private Float prixAvecCoefficient;  // Prix par nuit avec coefficient de l'agence appliqué
 
     // Constructeurs
     public ReservationRequest() {
@@ -81,6 +82,14 @@ public class ReservationRequest {
 
     public void setAgenceId(String agenceId) {
         this.agenceId = agenceId;
+    }
+
+    public Float getPrixAvecCoefficient() {
+        return prixAvecCoefficient;
+    }
+
+    public void setPrixAvecCoefficient(Float prixAvecCoefficient) {
+        this.prixAvecCoefficient = prixAvecCoefficient;
     }
 
     @Override

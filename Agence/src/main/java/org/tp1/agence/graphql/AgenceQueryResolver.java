@@ -15,7 +15,6 @@ import java.util.Map;
 
 /**
  * Resolver GraphQL pour les queries de l'agence
- * Remplace les endpoints GET du AgenceController REST
  */
 @Controller
 public class AgenceQueryResolver {

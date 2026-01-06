@@ -30,20 +30,27 @@ public class HotelMutationResolver {
      */
     @MutationMapping
     public ReservationResponse creerReservation(@Argument ReservationRequest reservation) {
+        // Gérer le numéro de carte bancaire (requis en BDD)
+        String numeroCarteBancaire = reservation.getNumeroCarteBancaire();
+        if (numeroCarteBancaire == null || numeroCarteBancaire.trim().isEmpty()) {
+            numeroCarteBancaire = "XXXXXXXXXXXX"; // Valeur par défaut
+        }
+
         // Créer le client
         Client client = new Client(
             reservation.getNomClient(),
             reservation.getPrenomClient(),
-            reservation.getNumeroCarteBancaire()
+            numeroCarteBancaire
         );
 
-        // Effectuer la réservation (utilise l'ID de la chambre + agenceId)
+        // Effectuer la réservation (utilise l'ID de la chambre + agenceId + prix avec coefficient)
         HotelService.ReservationResult result = hotelService.effectuerReservation(
             client,
             reservation.getChambreId(),
             reservation.getDateArrive(),
             reservation.getDateDepart(),
-            reservation.getAgenceId()  // Passer l'agenceId
+            reservation.getAgenceId(),  // Passer l'agenceId
+            reservation.getPrixAvecCoefficient()  // Passer le prix avec coefficient
         );
 
         if (result.isSuccess()) {

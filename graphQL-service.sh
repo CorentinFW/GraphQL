@@ -67,30 +67,45 @@ sleep 3
 
 # 4️⃣ Vérification
 echo ""
-echo -e "${YELLOW}4️⃣  Vérification des services...${NC}"
-sleep 2
+echo -e "${YELLOW}4️⃣  Vérification des services (timeout: 30s par service)...${NC}"
 
 SERVICES_OK=0
 
+# Fonction pour attendre qu'un service soit prêt
+wait_for_service() {
+  local PORT=$1
+  local QUERY=$2
+  local MAX_ATTEMPTS=30
+  local ATTEMPT=0
+
+  while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+    if curl -s http://localhost:$PORT/graphql -H "Content-Type: application/json" \
+      -d "{\"query\":\"$QUERY\"}" > /dev/null 2>&1; then
+      return 0
+    fi
+    ATTEMPT=$((ATTEMPT + 1))
+    sleep 1
+  done
+  return 1
+}
+
 # Vérifier les hôtels
 for PORT in 8082 8083 8084; do
-  if curl -s http://localhost:$PORT/graphql -H "Content-Type: application/json" \
-    -d '{"query":"{ hotelInfo { nom } }"}' > /dev/null 2>&1; then
+  if wait_for_service $PORT "{ hotelInfo { nom } }"; then
     echo -e "${GREEN}   ✅ Hôtel sur port $PORT opérationnel${NC}"
     ((SERVICES_OK++))
   else
-    echo -e "${RED}   ❌ Hôtel sur port $PORT non accessible${NC}"
+    echo -e "${RED}   ❌ Hôtel sur port $PORT non accessible après 30s${NC}"
   fi
 done
 
 # Vérifier les agences
 for PORT in 8081 8085; do
-  if curl -s http://localhost:$PORT/graphql -H "Content-Type: application/json" \
-    -d '{"query":"{ ping { message } }"}' > /dev/null 2>&1; then
+  if wait_for_service $PORT "{ ping { message } }"; then
     echo -e "${GREEN}   ✅ Agence sur port $PORT opérationnelle${NC}"
     ((SERVICES_OK++))
   else
-    echo -e "${RED}   ❌ Agence sur port $PORT non accessible${NC}"
+    echo -e "${RED}   ❌ Agence sur port $PORT non accessible après 30s${NC}"
   fi
 done
 

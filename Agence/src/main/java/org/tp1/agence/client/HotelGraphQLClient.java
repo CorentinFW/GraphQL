@@ -108,6 +108,11 @@ public class HotelGraphQLClient {
                 agenceIdField = "    agenceId: \"" + request.getAgenceId() + "\"\n";
             }
 
+            String prixAvecCoefficientField = "";
+            if (request.getPrixAvecCoefficient() != null) {
+                prixAvecCoefficientField = "    prixAvecCoefficient: " + request.getPrixAvecCoefficient() + "\n";
+            }
+
             String mutation = String.format("""
                 mutation {
                   creerReservation(reservation: {
@@ -115,7 +120,7 @@ public class HotelGraphQLClient {
                     nomClient: "%s"
                     prenomClient: "%s"
                     emailClient: "%s"
-                %s%s%s    dateArrive: "%s"
+                %s%s%s%s    dateArrive: "%s"
                     dateDepart: "%s"
                   }) {
                     success
@@ -131,6 +136,7 @@ public class HotelGraphQLClient {
                 telephoneClientField,  // Sera soit "    telephoneClient: "..."\n" soit ""
                 numeroCarteBancaireField,  // Sera soit "    numeroCarteBancaire: "..."\n" soit ""
                 agenceIdField,  // Sera soit "    agenceId: "..."\n" soit ""
+                prixAvecCoefficientField,  // Sera soit "    prixAvecCoefficient: X.X\n" soit ""
                 request.getDateArrive(),
                 request.getDateDepart()
             );
