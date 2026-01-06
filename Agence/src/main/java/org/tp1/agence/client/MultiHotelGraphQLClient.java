@@ -31,6 +31,9 @@ public class MultiHotelGraphQLClient {
     @Value("${agence.coefficient:1.0}")
     private float agenceCoefficient;
 
+    @Value("${agence.id:agence-default}")
+    private String agenceId;
+
     @Value("${hotel.paris.graphql.url:#{null}}")
     private String hotelParisGraphQLUrl;
 
@@ -57,6 +60,7 @@ public class MultiHotelGraphQLClient {
 
         System.out.println("═══════════════════════════════════════════");
         System.out.println("  " + agenceNom + " - Configuration GraphQL");
+        System.out.println("  ID Agence: " + agenceId);
         System.out.println("  Coefficient de prix: " + agenceCoefficient);
         System.out.println("  Nombre d'hôtels: " + hotelGraphQLUrls.size());
         if (hotelParisGraphQLUrl != null) System.out.println("  - Hôtel Paris: " + hotelParisGraphQLUrl);
@@ -192,6 +196,10 @@ public class MultiHotelGraphQLClient {
         System.out.println("   - dateArrive: " + request.getDateArrive());
         System.out.println("   - dateDepart: " + request.getDateDepart());
         System.out.println("   - hotelAdresse: " + request.getHotelAdresse());
+        System.out.println("   - agenceId: " + agenceId);
+
+        // Ajouter l'agenceId à la requête
+        request.setAgenceId(agenceId);
 
         // Effectuer la réservation via GraphQL
         ReservationResponse response = hotelGraphQLClient.effectuerReservation(targetHotelGraphQLUrl, request);
@@ -207,9 +215,10 @@ public class MultiHotelGraphQLClient {
 
     /**
      * Obtenir toutes les réservations de tous les hôtels partenaires
+     * Filtre uniquement les réservations de cette agence
      */
     public List<Map<String, Object>> getAllReservations() {
-        System.out.println("📋 Récupération des réservations de " + hotelGraphQLUrls.size() + " hôtels...");
+        System.out.println("📋 Récupération des réservations de " + hotelGraphQLUrls.size() + " hôtels pour l'agence: " + agenceId);
 
         List<Map<String, Object>> allReservations = new ArrayList<>();
 
@@ -223,19 +232,26 @@ public class MultiHotelGraphQLClient {
                 // Récupérer les réservations de cet hôtel
                 List<Map<String, Object>> reservations = hotelGraphQLClient.getReservations(hotelGraphQLUrl);
 
-                // Enrichir chaque réservation avec le nom de l'hôtel
+                // Filtrer et enrichir uniquement les réservations de cette agence
+                int countForAgence = 0;
                 for (Map<String, Object> reservation : reservations) {
-                    reservation.put("hotelNom", hotelNom);
-                    allReservations.add(reservation);
+                    String reservationAgenceId = (String) reservation.get("agenceId");
+
+                    // Ne garder que les réservations de cette agence
+                    if (agenceId.equals(reservationAgenceId)) {
+                        reservation.put("hotelNom", hotelNom);
+                        allReservations.add(reservation);
+                        countForAgence++;
+                    }
                 }
 
-                System.out.println("  ✅ " + hotelNom + ": " + reservations.size() + " réservation(s)");
+                System.out.println("  ✅ " + hotelNom + ": " + countForAgence + " réservation(s) pour " + agenceId);
             } catch (Exception e) {
                 System.err.println("  ❌ Erreur avec " + hotelGraphQLUrl + ": " + e.getMessage());
             }
         }
 
-        System.out.println("📊 Total: " + allReservations.size() + " réservation(s)");
+        System.out.println("📊 Total: " + allReservations.size() + " réservation(s) pour l'agence " + agenceId);
         return allReservations;
     }
 

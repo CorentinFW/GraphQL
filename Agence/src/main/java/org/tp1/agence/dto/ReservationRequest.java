@@ -10,6 +10,7 @@ public class ReservationRequest {
     private String hotelAdresse;
     private String dateArrive;
     private String dateDepart;
+    private String agenceId;  // Identifiant de l'agence qui effectue la réservation
 
     public ReservationRequest() {
     }
@@ -130,6 +131,14 @@ public class ReservationRequest {
 
     public void setDateDepart(String dateDepart) {
         this.dateDepart = dateDepart;
+    }
+
+    public String getAgenceId() {
+        return agenceId;
+    }
+
+    public void setAgenceId(String agenceId) {
+        this.agenceId = agenceId;
     }
 }
 

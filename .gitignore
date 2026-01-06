@@ -9,6 +9,8 @@ logs/
 **/data/*.db
 **/data/*.mv.db
 **/data/*.trace.db
+**/data/*.lock.db
+data/  # Dossier data à la racine du projet
 
 # IDE - IntelliJ IDEA
 .idea/

@@ -103,6 +103,11 @@ public class HotelGraphQLClient {
                 numeroCarteBancaireField = "    numeroCarteBancaire: \"" + request.getClientNumeroCarteBleue() + "\"\n";
             }
 
+            String agenceIdField = "";
+            if (request.getAgenceId() != null && !request.getAgenceId().trim().isEmpty()) {
+                agenceIdField = "    agenceId: \"" + request.getAgenceId() + "\"\n";
+            }
+
             String mutation = String.format("""
                 mutation {
                   creerReservation(reservation: {
@@ -110,7 +115,7 @@ public class HotelGraphQLClient {
                     nomClient: "%s"
                     prenomClient: "%s"
                     emailClient: "%s"
-                %s%s    dateArrive: "%s"
+                %s%s%s    dateArrive: "%s"
                     dateDepart: "%s"
                   }) {
                     success
@@ -125,6 +130,7 @@ public class HotelGraphQLClient {
                 request.getEmailClient() != null ? request.getEmailClient() : "",
                 telephoneClientField,  // Sera soit "    telephoneClient: "..."\n" soit ""
                 numeroCarteBancaireField,  // Sera soit "    numeroCarteBancaire: "..."\n" soit ""
+                agenceIdField,  // Sera soit "    agenceId: "..."\n" soit ""
                 request.getDateArrive(),
                 request.getDateDepart()
             );
@@ -279,6 +285,7 @@ public class HotelGraphQLClient {
                     dateArrive
                     dateDepart
                     prixTotal
+                    agenceId
                   }
                 }
                 """;

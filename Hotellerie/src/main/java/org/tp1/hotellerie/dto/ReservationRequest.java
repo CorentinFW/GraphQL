@@ -11,6 +11,7 @@ public class ReservationRequest {
     private String nomClient;
     private String prenomClient;
     private String numeroCarteBancaire;
+    private String agenceId;  // Identifiant de l'agence qui effectue la réservation
 
     // Constructeurs
     public ReservationRequest() {
@@ -72,6 +73,14 @@ public class ReservationRequest {
 
     public void setNumeroCarteBancaire(String numeroCarteBancaire) {
         this.numeroCarteBancaire = numeroCarteBancaire;
+    }
+
+    public String getAgenceId() {
+        return agenceId;
+    }
+
+    public void setAgenceId(String agenceId) {
+        this.agenceId = agenceId;
     }
 
     @Override

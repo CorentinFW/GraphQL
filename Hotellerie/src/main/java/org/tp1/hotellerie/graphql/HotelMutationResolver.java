@@ -37,12 +37,13 @@ public class HotelMutationResolver {
             reservation.getNumeroCarteBancaire()
         );
 
-        // Effectuer la réservation (utilise l'ID de la chambre)
+        // Effectuer la réservation (utilise l'ID de la chambre + agenceId)
         HotelService.ReservationResult result = hotelService.effectuerReservation(
             client,
             reservation.getChambreId(),
             reservation.getDateArrive(),
-            reservation.getDateDepart()
+            reservation.getDateDepart(),
+            reservation.getAgenceId()  // Passer l'agenceId
         );
 
         if (result.isSuccess()) {

@@ -265,6 +265,19 @@ tail -f logs/client-gui.log
 
 ---
 
+## 🐛 Corrections Récentes
+
+### Version 3.1 - 6 janvier 2026
+
+✅ **Correction du bug de duplication des réservations Lyon**
+- **Problème :** Les réservations de l'hôtel Lyon (partagé entre 2 agences) apparaissaient dans les deux agences
+- **Solution :** Ajout d'un champ `agenceId` dans les réservations pour isoler les données par agence
+- **Impact :** Chaque agence voit maintenant uniquement ses propres réservations
+
+Détails complets : Voir `old/CORRECTIONS-BUGS.md`
+
+---
+
 ## 🔧 Maintenance
 
 ### Recompiler les modules

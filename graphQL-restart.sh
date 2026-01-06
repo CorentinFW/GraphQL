@@ -26,11 +26,37 @@ echo -e "${GREEN}   ✅ Services arrêtés${NC}"
 echo ""
 echo -e "${YELLOW}2️⃣  Suppression des bases de données H2...${NC}"
 
-if [ -d "Hotellerie/data" ]; then
-  rm -f Hotellerie/data/*.db 2>/dev/null
-  echo -e "${GREEN}   ✅ Bases de données H2 supprimées${NC}"
+# Les fichiers H2 sont créés dans ./data/ (relatif au répertoire d'exécution)
+if [ -d "data" ]; then
+  # Supprimer TOUS les fichiers de la base H2 (toutes extensions)
+  rm -f data/*.mv.db 2>/dev/null
+  rm -f data/*.trace.db 2>/dev/null
+  rm -f data/*.lock.db 2>/dev/null
+  rm -f data/*.h2.db 2>/dev/null
+  rm -f data/*.db 2>/dev/null
+
+  # Compter les fichiers restants
+  REMAINING=$(ls -1 data/ 2>/dev/null | wc -l)
+
+  if [ $REMAINING -eq 0 ]; then
+    echo -e "${GREEN}   ✅ Bases de données H2 supprimées (data/*.mv.db)${NC}"
+  else
+    echo -e "${YELLOW}   ⚠️  $REMAINING fichier(s) restant(s) dans data/${NC}"
+    ls -lh data/
+  fi
 else
-  echo -e "${BLUE}   ℹ️  Dossier data/ inexistant (sera créé au démarrage)${NC}"
+  mkdir -p data
+  echo -e "${BLUE}   ℹ️  Dossier data/ créé${NC}"
+fi
+
+# Aussi vérifier et supprimer dans Hotellerie/data/ au cas où
+if [ -d "Hotellerie/data" ]; then
+  rm -f Hotellerie/data/*.mv.db 2>/dev/null
+  rm -f Hotellerie/data/*.trace.db 2>/dev/null
+  rm -f Hotellerie/data/*.lock.db 2>/dev/null
+  rm -f Hotellerie/data/*.h2.db 2>/dev/null
+  rm -f Hotellerie/data/*.db 2>/dev/null
+  echo -e "${BLUE}   ℹ️  Nettoyage de Hotellerie/data/ effectué${NC}"
 fi
 
 # 3️⃣ Démarrage des hôtels
@@ -40,24 +66,27 @@ echo -e "${YELLOW}3️⃣  Démarrage des hôtels GraphQL avec bases H2 vierges.
 # Créer le dossier logs s'il n'existe pas
 mkdir -p logs
 
-# Hôtel Paris (port 8082)
+# Hôtel Paris (port 8082) - FORCE LA RECRÉATION DE LA BASE
 nohup java -jar Hotellerie/target/Hotellerie-0.0.1-SNAPSHOT.jar \
   --spring.profiles.active=paris \
-  --server.port=8082 > logs/hotel-paris.log 2>&1 &
+  --server.port=8082 \
+  --spring.jpa.hibernate.ddl-auto=create > logs/hotel-paris.log 2>&1 &
 echo -e "${GREEN}   ✅ Hôtel Paris démarré (port 8082) - BDD réinitialisée${NC}"
 sleep 4
 
-# Hôtel Lyon (port 8083)
+# Hôtel Lyon (port 8083) - FORCE LA RECRÉATION DE LA BASE
 nohup java -jar Hotellerie/target/Hotellerie-0.0.1-SNAPSHOT.jar \
   --spring.profiles.active=lyon \
-  --server.port=8083 > logs/hotel-lyon.log 2>&1 &
+  --server.port=8083 \
+  --spring.jpa.hibernate.ddl-auto=create > logs/hotel-lyon.log 2>&1 &
 echo -e "${GREEN}   ✅ Hôtel Lyon démarré (port 8083) - BDD réinitialisée${NC}"
 sleep 4
 
-# Hôtel Montpellier (port 8084)
+# Hôtel Montpellier (port 8084) - FORCE LA RECRÉATION DE LA BASE
 nohup java -jar Hotellerie/target/Hotellerie-0.0.1-SNAPSHOT.jar \
   --spring.profiles.active=montpellier \
-  --server.port=8084 > logs/hotel-montpellier.log 2>&1 &
+  --server.port=8084 \
+  --spring.jpa.hibernate.ddl-auto=create > logs/hotel-montpellier.log 2>&1 &
 echo -e "${GREEN}   ✅ Hôtel Montpellier démarré (port 8084) - BDD réinitialisée${NC}"
 sleep 4
 

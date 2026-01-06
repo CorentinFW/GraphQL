@@ -37,6 +37,9 @@ public class Reservation {
     @Column(name = "date_depart", nullable = false)
     private Date dateDepart;
 
+    @Column(name = "agence_id")
+    private String agenceId;  // Identifiant de l'agence qui a effectué la réservation
+
     // Constructeur par défaut requis par JPA
     public Reservation() {
     }
@@ -103,5 +106,13 @@ public class Reservation {
 
     public void setDateDepart(Date dateDepart) {
         this.dateDepart = dateDepart;
+    }
+
+    public String getAgenceId() {
+        return agenceId;
+    }
+
+    public void setAgenceId(String agenceId) {
+        this.agenceId = agenceId;
     }
 }

@@ -15,6 +15,7 @@ public class ReservationDTO {
     private String dateArrive;
     private String dateDepart;
     private Float prixTotal;
+    private String agenceId;  // Identifiant de l'agence qui a effectué la réservation
 
     // Constructeur vide
     public ReservationDTO() {
@@ -106,6 +107,14 @@ public class ReservationDTO {
 
     public void setPrixTotal(Float prixTotal) {
         this.prixTotal = prixTotal;
+    }
+
+    public String getAgenceId() {
+        return agenceId;
+    }
+
+    public void setAgenceId(String agenceId) {
+        this.agenceId = agenceId;
     }
 }
 

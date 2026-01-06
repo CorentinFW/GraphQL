@@ -224,7 +224,7 @@ public class HotelService {
      * Effectue une réservation - TOUT EN BDD
      */
     @Transactional
-    public ReservationResult effectuerReservation(Client client, long chambreId, String dateArrive, String dateDepart) {
+    public ReservationResult effectuerReservation(Client client, long chambreId, String dateArrive, String dateDepart, String agenceId) {
         // Vérifier que le client est valide
         if (client == null || client.getNom() == null || client.getNom().isEmpty()) {
             return new ReservationResult(0, false, "Client invalide");
@@ -273,6 +273,7 @@ public class HotelService {
         // Créer et SAUVEGARDER la réservation EN BDD
         Reservation reservation = new Reservation(numeroReservation, clientDB, chambre, arrive, depart);
         reservation.setHotel(hotel);
+        reservation.setAgenceId(agenceId);  // Stocker l'agenceId
         reservation = reservationRepository.save(reservation);
 
         return new ReservationResult(numeroReservation, true, "Réservation effectuée avec succès");
@@ -418,6 +419,9 @@ public class HotelService {
                 long diffInDays = diffInMillies / (1000 * 60 * 60 * 24);
                 dto.setPrixTotal(reservation.getChambre().getPrix() * diffInDays);
             }
+
+            // Mapper agenceId
+            dto.setAgenceId(reservation.getAgenceId());
 
             dtos.add(dto);
         }

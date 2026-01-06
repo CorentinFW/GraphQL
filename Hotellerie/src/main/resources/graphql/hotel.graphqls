@@ -50,6 +50,7 @@ type Reservation {
     dateArrive: String!
     dateDepart: String!
     prixTotal: Float!
+    agenceId: String  # Identifiant de l'agence qui a effectué la réservation
 }
 
 input RechercheInput {
@@ -71,6 +72,7 @@ input ReservationInput {
     numeroCarteBancaire: String
     dateArrive: String!
     dateDepart: String!
+    agenceId: String  # Identifiant de l'agence qui effectue la réservation
 }
 
 type ReservationResponse {

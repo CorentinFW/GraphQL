@@ -334,7 +334,7 @@ public class ClientGUI {
         new SwingWorker<List<ChambreDTO>, Void>() {
             @Override
             protected List<ChambreDTO> doInBackground() throws Exception {
-                log("   Appel du client graphQL...");
+                log("   Appel du client GraphQL...");
                 List<ChambreDTO> result = agenceGraphQLClient.rechercherChambres(
                     adresse, dateArrivee, dateDepart,
                     prixMin, prixMax, nbrEtoiles, nbrLits
@@ -894,14 +894,14 @@ public class ClientGUI {
 
     private void afficherAPropos() {
         String message = "Système de Réservation Multi-Agences\n\n" +
-                        "Version 2.0 - Interface Graphique\n" +
-                        "Architecture graphQL avec Spring Boot\n\n" +
+                        "Version 3.1 - Interface Graphique\n" +
+                        "Architecture GraphQL avec Spring Boot\n\n" +
                         "Fonctionnalités:\n" +
                         "• Recherche de chambres multi-agences\n" +
                         "• Comparaison de prix en temps réel\n" +
                         "• Réservation en ligne\n" +
                         "• Consultation des réservations\n\n" +
-                        "© 2025 - Projet Multi-Agences";
+                        "© 2026 - Projet Multi-Agences";
 
         JOptionPane.showMessageDialog(frame, message, "À propos",
             JOptionPane.INFORMATION_MESSAGE);
